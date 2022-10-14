@@ -1,0 +1,5 @@
+export IMAGENET_TRAIN_DATASET=path_of_dataset
+export IMAGENET_TRAIN_CHECKPOINT=path_of_ckpt
+export TORCH_HOME=path_of_checkpoint_download_path
+export AVG_LOG=data/output/avg_log
+export BENCHMARK_LOG=data/output/benchmark_log

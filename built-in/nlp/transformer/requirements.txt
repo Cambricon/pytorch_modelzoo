@@ -1,0 +1,5 @@
+NumPy >= 1.11.1
+nltk==3.2.5
+regex==2018.2.3
+pandas>=0.22.0
+matplotlib>=2.1.2
