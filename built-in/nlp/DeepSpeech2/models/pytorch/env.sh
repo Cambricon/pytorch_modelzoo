@@ -1,0 +1,4 @@
+export MASTER_ADDR='127.0.0.1'
+export RANK=1
+export WORLD_SIZE=1
+export MASTER_PORT=29500

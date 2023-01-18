@@ -2,7 +2,7 @@
 set -e
 
 CUR_DIR=$(cd $(dirname $0);pwd)
-TRANS_DIR=$(cd ${CUR_DIR}/../;pwd)
+TRANS_DIR=$(cd ${CUR_DIR}/../models/;pwd)
 
 # 帮助函数
 function usage () {
@@ -41,28 +41,9 @@ else
 fi
 set_configs "$config"
 
-# env
-CORPORA_PATH=${TRANS_DIR}/corpora
-CKPT_MODEL_PATH=${TRANS_DIR}/ckpt_model
-if [ -z ${IWSLT_CORPUS_PATH} ]; then
-  echo "please set environment variable IWSLT_CORPUS_PATH."
-  exit 1
-fi
-if [ -z ${TRANSFORMER_CKPT} ]; then
-  echo "please set environment variable TRANSFORMER_CKPT."
-  exit 1
-fi
-
-if [ ! -d ${CORPORA_PATH} ]; then
-  ln -s ${IWSLT_CORPUS_PATH} ${CORPORA_PATH}
-fi
-if [ ! -d ${CKPT_MODEL_PATH} ]; then
-  ln -s ${TRANSFORMER_CKPT} ${CKPT_MODEL_PATH}
-fi
-
 log_dir=${TRANS_DIR}/logs
 
-run_cmd="transformer_train.py  \
+run_cmd="train.py  \
   --log-path ${log_dir} \
   --num_epochs ${num_epochs} \
   --iterations ${iters} \
@@ -72,7 +53,7 @@ run_cmd="transformer_train.py  \
   --workers ${num_workers} \
   --dropout_rate 0.0"
 
-check_cmd="transformer_test.py \
+check_cmd="eval.py \
 --pretrained ${CKPT_MODEL_PATH}/model_epoch_09.pth \
 --device $device"
 

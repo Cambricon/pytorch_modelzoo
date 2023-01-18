@@ -63,9 +63,6 @@ set_configs () {
         iters=-1
         perf_iters_rule iters
 
-        ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../benchmark_log
-
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
         get_platform cur_platform

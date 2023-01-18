@@ -1,0 +1,9 @@
+Cython
+numpy
+ninja==1.10.0.post2
+yacs==0.1.6
+opencv-python
+tqdm==4.27
+tensorboardX
+cityscapesscripts
+pycocotools

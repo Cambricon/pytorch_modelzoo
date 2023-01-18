@@ -1,0 +1,78 @@
+# Training configuration for inception_v2 trained on ImageNet on GPUs.
+# # Reaches > 71.69% within 100 epochs.
+# # Note: This configuration uses a scaled per-replica batch size based on the number of devices.
+
+model: 'inception_v2'
+pretrain:
+        path: ""
+train_dataset:
+        path: "/algo/modelzoo/datasets/imagenet/jpegs/train"
+        transform:
+                list:
+                  - "randomresizedcrop"
+                  - "randomhorizontalflip"
+                  - "totensor"
+                  - "normalize"
+                crop: 224
+                mean: 
+                  - 0.485
+                  - 0.456
+                  - 0.406
+                std:
+                  - 0.229
+                  - 0.224
+                  - 0.225
+train:
+        batch_size: 512
+        optimizer:
+                learning_rate: 0.02
+                type: "sgd"
+                momentum: 0.9 
+                weight_decay: 0.0001
+        scheduler:
+                epochs:  100
+                type: "step"
+                step: 30
+                gamma: 0.1
+        criterion:
+                type: "crossentropy"
+        shuffle: True
+        pin_memory: False
+        rank: 0
+        workers: 8
+        world_size: 1
+        dist_url: "tcp://127.0.0.1:8123"
+        dist_backend: 'nccl'
+valid_dataset:
+        path: "/algo/modelzoo/datasets/imagenet/jpegs/val"
+        transform:
+                list:
+                  - "resize"
+                  - "centercrop"
+                  - "totensor"
+                  - "normalize"
+                resize: 256
+                crop: 224
+                mean: 
+                  - 0.485
+                  - 0.456
+                  - 0.406
+                std:
+                  - 0.229
+                  - 0.224
+                  - 0.225
+valid:
+        batch_size: 64
+        workers: 1
+        shuffle: False
+        pin_memory: False
+quanz:
+        second_stage_iters: 2503
+        max_update_iters: 2503
+        input_init_bit: 8
+        input_mode: 'auto'
+        weight_init_bit: 8
+        weight_mode: 'auto'
+        grad_init_bit: 8
+        grad_mode: 'auto_bit'
+        infer: 'infer_offline'

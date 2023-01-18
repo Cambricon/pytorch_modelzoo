@@ -1,0 +1,3 @@
+export PYTORCH_TRAIN_DATASET=path_of_datasets
+export PYTORCH_TRAIN_CHECKPOINT=path_of_train_checkpoints
+export PYTORCH_INFER_CHECKPOINT=path_of_infer_checkpoints

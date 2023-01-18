@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from torch.autograd import *
 import numpy as np
 from torch.nn.parameter import Parameter
-from .hyperparams import *
+from hyperparams import *
 
 class embedding(nn.Module):
 

@@ -12,9 +12,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import *
 import numpy as np
-from .modules import *
-from .hyperparams import *
-from .hyperparams import Hyperparams as hp
+from modules import *
+from hyperparams import *
+from hyperparams import Hyperparams as hp
 
 class AttModel(nn.Module):
     def __init__(self, hp_, enc_voc, dec_voc):

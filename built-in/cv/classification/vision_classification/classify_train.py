@@ -74,6 +74,8 @@ parser.add_argument('--seed', default=1, type=int,
                         help='seed for initializing training. ')
 parser.add_argument("--save_ckp", dest='save_ckp', action='store_true',
                         help="Enable save checkpoint")
+parser.add_argument("--save_best", dest='save_best', action='store_true',
+                        help="Save the best checkpoint of Training ")
 parser.add_argument('--iters', type=int, default=30000, metavar='N',
                         help='iters per epoch')
 parser.add_argument('--device', default='cpu', type=str,
@@ -108,6 +110,7 @@ parser.add_argument('--evaluate_every', '--eval_every', dest='evaluate_every', t
 parser.add_argument('--quality_threshold', dest='quality_threshold', type=float, default=None, 
                     help='target accuracy')
 
+best_acc1 = 0
 
 model_path = parser.parse_known_args()[0].modeldir
 sys.path.append(model_path)
@@ -183,6 +186,7 @@ def main():
         main_worker(args.device_id, ndevs_per_node, args)
 
 def main_worker(dev_id, ndevs_per_node, args):
+    global best_acc1
     args.device_id = dev_id
     if args.device_id is None:
         args.device_id = 0  # Default Device is 0
@@ -219,6 +223,7 @@ def main_worker(dev_id, ndevs_per_node, args):
     valdir        = os.path.join(args.data, 'val')
     normalize     = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
+
     train_dataset = datasets.ImageFolder(traindir,
                              transforms.Compose([transforms.RandomResizedCrop(224),
                                                  transforms.RandomHorizontalFlip(),
@@ -233,6 +238,7 @@ def main_worker(dev_id, ndevs_per_node, args):
         else:
             train_sampler = None
 
+
     train_loader = torch.utils.data.DataLoader(
             train_dataset,
             batch_size=args.batch_size,
@@ -240,6 +246,7 @@ def main_worker(dev_id, ndevs_per_node, args):
             sampler=train_sampler,
             num_workers=args.workers,
             pin_memory=True)
+
     val_loader = torch.utils.data.DataLoader(
             datasets.ImageFolder(valdir, transforms.Compose([
                 transforms.Resize(256),
@@ -362,6 +369,7 @@ def main_worker(dev_id, ndevs_per_node, args):
                         checkpoint["cnmix"]=cnmix.state_dict()
                     if args.pyamp and scaler is not None:
                         checkpoint["amp"]=scaler.state_dict()
+                    checkpoint['best_acc1'] = best_acc1
                     torch.save(checkpoint, save_file_path)
                     print("=> Model save finished")
                     # Load from ckp:
@@ -386,7 +394,27 @@ def main_worker(dev_id, ndevs_per_node, args):
                 adjust_learning_rate(optimizer, epoch, args)
             if args.distributed or args.hvd != -1:
                 train_sampler.set_epoch(epoch)
+
             train_metrics = train(train_loader, model, criterion, optimizer, epoch, scaler, args)
+
+            if args.save_best:
+                result = validate(val_loader, model, criterion, args)
+                is_best = result['top1'] > best_acc1
+                best_acc1 = max(result['top1'], best_acc1)
+
+                best_filename = args.ckpdir + "_best_checkpoint.pth"
+
+                if not args.multiprocessing_distributed or (args.multiprocessing_distributed 
+                        and args.rank % ndevs_per_node == 0):
+                    torch.save({
+                        'epoch': epoch + 1,
+                        'arch': args.arch,
+                        'state_dict': model.module.state_dict() if args.multiprocessing_distributed else model.state_dict(),
+                        'best_acc1': best_acc1,
+                        'optimizer' : optimizer.state_dict()
+                    },best_filename)
+
+
             if args.quality_threshold is not None:
                 if epoch == next_eval_at:
                     print("=> Test on val-dataset only")

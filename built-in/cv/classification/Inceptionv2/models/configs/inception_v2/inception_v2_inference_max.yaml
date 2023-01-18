@@ -1,0 +1,56 @@
+model: 'inception_v2'
+pretrain:
+        path: ""
+valid_dataset:
+        path: "/algo_public/datasets/imagenet/jpegs/val"
+        transform:
+                list:
+                  - "resize"
+                  - "centercrop"
+                  - "totensor"
+                  - "tospacebgr"
+                  - "torange255"
+                  - "normalize"
+                resize: 256
+                crop: 224
+                mean: 
+                  - 104
+                  - 117
+                  - 128
+                std:
+                  - 1
+                  - 1
+                  - 1
+valid:
+        batch_size: 256
+        workers: 1
+        shuffle: False
+        pin_memory: False
+calib_dataset:
+        path: "/algo_public/datasets/imagenet/jpegs/val"
+        transform:
+                list:
+                  - "resize"
+                  - "centercrop"
+                  - "totensor"
+                  - "tospacebgr"
+                  - "torange255"
+                  - "normalize"
+                resize: 256
+                crop: 224
+                mean: 
+                  - 104
+                  - 117
+                  - 128
+                std:
+                  - 1
+                  - 1
+                  - 1
+        file: 'calib/max.txt'
+calib:
+        batch_size: 100
+        input_calib_type: 'max'
+        weight_calib_type: 'max'
+        workers: 1
+        shuffle: False
+        pin_memory: False

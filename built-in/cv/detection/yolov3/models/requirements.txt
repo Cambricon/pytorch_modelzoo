@@ -1,0 +1,10 @@
+tensorboard>=2.4.1
+scikit-image
+numpy
+pillow
+matplotlib
+sacred
+tqdm
+pycocotools
+opencv-python
+

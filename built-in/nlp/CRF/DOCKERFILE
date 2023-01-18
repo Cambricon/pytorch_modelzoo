@@ -1,0 +1,17 @@
+ARG FROM_IMAGE_NAME=yellow.hub.cambricon.com/pytorch/pytorch:v1.6.0-torch1.6-ubuntu18.04
+
+FROM ${FROM_IMAGE_NAME}
+
+RUN mkdir -p /home/pytorch_modelzoo/
+
+COPY ./tools /home/pytorch_modelzoo/tools
+
+COPY ./built-in/nlp/CRF /home/pytorch_modelzoo/built-in/nlp/CRF
+
+WORKDIR /home/pytorch_modelzoo/built-in/nlp/CRF/
+
+ENV VIRTUAL_ENV=/torch/venv3/pytorch
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install -r models/requirements.txt

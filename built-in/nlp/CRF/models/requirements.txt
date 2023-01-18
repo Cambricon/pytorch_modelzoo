@@ -1,0 +1,4 @@
+-r requirements-test.txt
+flake8==3.5.0
+flake8-mypy==17.8.0
+yapf==0.25.0

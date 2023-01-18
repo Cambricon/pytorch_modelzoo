@@ -37,8 +37,8 @@ config=$1
 source ${CUR_DIR}/params_config.sh
 set_configs "$config"
 
-log_dir="${CUR_DIR}/../data/output/${net}_log"
-ckp_dir="${CUR_DIR}/../data/output/${net}_ckps"
+log_dir="${CUR_DIR}/../data/output/${net}_train_perf_log"
+ckp_dir="${CUR_DIR}/../data/output/${net}_train_perf_ckps"
 
 # config配置到网络脚本的转换
 main() {

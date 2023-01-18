@@ -1,0 +1,4 @@
+dominate>=2.4.0
+visdom>=0.1.8.8
+wandb
+protobuf==3.20.*; python_version >= '3.7'

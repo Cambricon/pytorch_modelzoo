@@ -1,0 +1,20 @@
+ARG FROM_IMAGE_NAME=yellow.hub.cambricon.com/pytorch/pytorch:v1.6.0-torch1.6-ubuntu18.04
+
+FROM ${FROM_IMAGE_NAME}
+
+#RUN git clone http://gitlab.software.cambricon.com/neuware/pytorch_models.git /home/pytorch_modelzoo -b pytorch_modelzoo_refactoring
+RUN mkdir -p /home/pytorch_modelzoo/
+
+COPY ./tools /home/pytorch_modelzoo/tools
+
+COPY ./built-in/segmentation/unet3d /home/pytorch_modelzoo/built-in/segmentation/unet3d
+
+WORKDIR /home/pytorch_modelzoo/built-in/segmentation/unet3d/
+
+ENV VIRTUAL_ENV=/torch/venv3/pytorch
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+#RUN source /torch/venv3/pytorch/bin/activate
+
+RUN pip install -r models/requirements.txt

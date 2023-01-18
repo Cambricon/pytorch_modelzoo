@@ -1,0 +1,9 @@
+# pip install -U -r requirements.txt
+numpy>=1.18.5
+opencv-python>=4.1.2
+matplotlib>=3.2.2
+pycocotools>=2.0.2
+tqdm>=4.60.0
+pillow>=7.1.2
+tensorboard>=2.4.1
+pyyaml>=5.3.1

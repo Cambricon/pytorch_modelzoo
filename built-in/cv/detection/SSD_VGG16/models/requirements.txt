@@ -1,0 +1,7 @@
+imageio==2.9.0
+networkx==2.5
+pycocotools==2.0.2
+PyWavelets==1.1.1
+scikit-image==0.15.0
+tensorboardX==2.1
+opencv-python

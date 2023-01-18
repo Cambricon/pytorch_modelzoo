@@ -1,0 +1,18 @@
+ARG FROM_IMAGE_NAME=yellow.hub.cambricon.com/pytorch/pytorch:v1.8.0-torch1.6-ubuntu18.04-py37
+
+FROM ${FROM_IMAGE_NAME}
+
+#RUN git clone http://gitlab.software.cambricon.com/neuware/pytorch_models.git /home/pytorch_modelzoo -b pytorch_modelzoo_refactoring
+RUN mkdir /home/pytorch_modelzoo/
+
+COPY ./tools /home/pytorch_modelzoo/tools
+
+COPY ./built-in/nlp/BERT /home/pytorch_modelzoo/built-in/nlp/BERT
+
+WORKDIR /home/pytorch_modelzoo/built-in/nlp/BERT/
+
+ENV VIRTUAL_ENV=/torch/venv3/pytorch
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install -r models/requirements.txt

@@ -17,4 +17,4 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 #RUN source /torch/venv3/pytorch/bin/activate
 
-RUN pip install -r requirements.txt
+RUN pip install -r models/requirements.txt

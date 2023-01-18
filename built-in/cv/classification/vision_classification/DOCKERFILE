@@ -1,4 +1,4 @@
-ARG FROM_IMAGE_NAME=yellow.hub.cambricon.com/pytorch/pytorch:v1.6.0-torch1.6-ubuntu18.04
+ARG FROM_IMAGE_NAME=yellow.hub.cambricon.com/pytorch/pytorch:v1.8.0-torch1.6-ubuntu18.04-py37
 FROM ${FROM_IMAGE_NAME}
 
 RUN mkdir /home/pytorch_modelzoo/

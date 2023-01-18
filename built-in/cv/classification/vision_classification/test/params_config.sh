@@ -1,5 +1,7 @@
 #!/bin/bash
 
+IMAGENET_TRAIN_CHECKPOINT=/data/pytorch/models/pytorch_weight/checkpoints/
+
 CONFIG_DIR=$(cd $(dirname $0);pwd)
 
 resnet50_base_params () {
@@ -335,9 +337,6 @@ set_configs () {
         ## 获取benchmark_mode计数规则,配置迭代数
         iters=-1
         perf_iters_rule iters
-
-        ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CONFIG_DIR}/../data/output/${net}
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""

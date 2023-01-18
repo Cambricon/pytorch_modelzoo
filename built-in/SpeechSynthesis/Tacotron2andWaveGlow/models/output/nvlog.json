@@ -1,0 +1,53 @@
+DLLL {"timestamp": "1670917011.732193", "datetime": "2022-12-13 15:36:51.732193", "elapsedtime": "1.5e-05", "type": "LOG", "step": "PARAMETER", "data": {"output": "output/"}}
+DLLL {"timestamp": "1670917011.732312", "datetime": "2022-12-13 15:36:51.732312", "elapsedtime": "0.000134", "type": "LOG", "step": "PARAMETER", "data": {"dataset_path": "/data/pytorch/datasets//TTS/"}}
+DLLL {"timestamp": "1670917011.732353", "datetime": "2022-12-13 15:36:51.732353", "elapsedtime": "0.000175", "type": "LOG", "step": "PARAMETER", "data": {"model_name": "WaveGlow"}}
+DLLL {"timestamp": "1670917011.732385", "datetime": "2022-12-13 15:36:51.732385", "elapsedtime": "0.000207", "type": "LOG", "step": "PARAMETER", "data": {"log_file": "nvlog.json"}}
+DLLL {"timestamp": "1670917011.732414", "datetime": "2022-12-13 15:36:51.732414", "elapsedtime": "0.000236", "type": "LOG", "step": "PARAMETER", "data": {"anneal_steps": null}}
+DLLL {"timestamp": "1670917011.732445", "datetime": "2022-12-13 15:36:51.732445", "elapsedtime": "0.000267", "type": "LOG", "step": "PARAMETER", "data": {"anneal_factor": 0.1}}
+DLLL {"timestamp": "1670917011.732476", "datetime": "2022-12-13 15:36:51.732476", "elapsedtime": "0.000298", "type": "LOG", "step": "PARAMETER", "data": {"config_file": null}}
+DLLL {"timestamp": "1670917011.732506", "datetime": "2022-12-13 15:36:51.732506", "elapsedtime": "0.000328", "type": "LOG", "step": "PARAMETER", "data": {"use_mlu": true}}
+DLLL {"timestamp": "1670917011.732538", "datetime": "2022-12-13 15:36:51.732538", "elapsedtime": "0.00036", "type": "LOG", "step": "PARAMETER", "data": {"seed": null}}
+DLLL {"timestamp": "1670917011.732568", "datetime": "2022-12-13 15:36:51.732568", "elapsedtime": "0.00039", "type": "LOG", "step": "PARAMETER", "data": {"epochs": 1001}}
+DLLL {"timestamp": "1670917011.732598", "datetime": "2022-12-13 15:36:51.732598", "elapsedtime": "0.00042", "type": "LOG", "step": "PARAMETER", "data": {"iter": -1}}
+DLLL {"timestamp": "1670917011.732628", "datetime": "2022-12-13 15:36:51.732628", "elapsedtime": "0.00045", "type": "LOG", "step": "PARAMETER", "data": {"epochs_per_checkpoint": 50}}
+DLLL {"timestamp": "1670917011.732657", "datetime": "2022-12-13 15:36:51.732657", "elapsedtime": "0.000479", "type": "LOG", "step": "PARAMETER", "data": {"checkpoint_path": ""}}
+DLLL {"timestamp": "1670917011.732684", "datetime": "2022-12-13 15:36:51.732684", "elapsedtime": "0.000506", "type": "LOG", "step": "PARAMETER", "data": {"resume_multi_device": false}}
+DLLL {"timestamp": "1670917011.732713", "datetime": "2022-12-13 15:36:51.732713", "elapsedtime": "0.000535", "type": "LOG", "step": "PARAMETER", "data": {"resume_from_last": false}}
+DLLL {"timestamp": "1670917011.732741", "datetime": "2022-12-13 15:36:51.732741", "elapsedtime": "0.000563", "type": "LOG", "step": "PARAMETER", "data": {"dynamic_loss_scaling": true}}
+DLLL {"timestamp": "1670917011.732769", "datetime": "2022-12-13 15:36:51.732769", "elapsedtime": "0.000591", "type": "LOG", "step": "PARAMETER", "data": {"pyamp": false}}
+DLLL {"timestamp": "1670917011.732798", "datetime": "2022-12-13 15:36:51.732798", "elapsedtime": "0.00062", "type": "LOG", "step": "PARAMETER", "data": {"cudnn_enabled": true}}
+DLLL {"timestamp": "1670917011.732826", "datetime": "2022-12-13 15:36:51.732826", "elapsedtime": "0.000648", "type": "LOG", "step": "PARAMETER", "data": {"cudnn_deterministic": false}}
+DLLL {"timestamp": "1670917011.732853", "datetime": "2022-12-13 15:36:51.732853", "elapsedtime": "0.000675", "type": "LOG", "step": "PARAMETER", "data": {"disable_uniform_initialize_bn_weight": false}}
+DLLL {"timestamp": "1670917011.732979", "datetime": "2022-12-13 15:36:51.732979", "elapsedtime": "0.000801", "type": "LOG", "step": "PARAMETER", "data": {"use_saved_learning_rate": false}}
+DLLL {"timestamp": "1670917011.73301", "datetime": "2022-12-13 15:36:51.733010", "elapsedtime": "0.000832", "type": "LOG", "step": "PARAMETER", "data": {"learning_rate": 0.0001}}
+DLLL {"timestamp": "1670917011.733041", "datetime": "2022-12-13 15:36:51.733041", "elapsedtime": "0.000863", "type": "LOG", "step": "PARAMETER", "data": {"weight_decay": 0.0}}
+DLLL {"timestamp": "1670917011.73307", "datetime": "2022-12-13 15:36:51.733070", "elapsedtime": "0.000892", "type": "LOG", "step": "PARAMETER", "data": {"grad_clip_thresh": 65504.0}}
+DLLL {"timestamp": "1670917011.733098", "datetime": "2022-12-13 15:36:51.733098", "elapsedtime": "0.00092", "type": "LOG", "step": "PARAMETER", "data": {"batch_size": 10}}
+DLLL {"timestamp": "1670917011.733126", "datetime": "2022-12-13 15:36:51.733126", "elapsedtime": "0.000948", "type": "LOG", "step": "PARAMETER", "data": {"grad_clip": 5.0}}
+DLLL {"timestamp": "1670917011.733153", "datetime": "2022-12-13 15:36:51.733153", "elapsedtime": "0.000975", "type": "LOG", "step": "PARAMETER", "data": {"load_mel_from_disk": false}}
+DLLL {"timestamp": "1670917011.73318", "datetime": "2022-12-13 15:36:51.733180", "elapsedtime": "0.001002", "type": "LOG", "step": "PARAMETER", "data": {"training_files": "filelists/ljs_audio_text_train_filelist.txt"}}
+DLLL {"timestamp": "1670917011.733208", "datetime": "2022-12-13 15:36:51.733208", "elapsedtime": "0.00103", "type": "LOG", "step": "PARAMETER", "data": {"validation_files": "filelists/ljs_audio_text_val_filelist.txt"}}
+DLLL {"timestamp": "1670917011.733236", "datetime": "2022-12-13 15:36:51.733236", "elapsedtime": "0.001058", "type": "LOG", "step": "PARAMETER", "data": {"text_cleaners": ["english_cleaners"]}}
+DLLL {"timestamp": "1670917011.733268", "datetime": "2022-12-13 15:36:51.733268", "elapsedtime": "0.00109", "type": "LOG", "step": "PARAMETER", "data": {"max_wav_value": 32768.0}}
+DLLL {"timestamp": "1670917011.733296", "datetime": "2022-12-13 15:36:51.733296", "elapsedtime": "0.001118", "type": "LOG", "step": "PARAMETER", "data": {"sampling_rate": 22050}}
+DLLL {"timestamp": "1670917011.733323", "datetime": "2022-12-13 15:36:51.733323", "elapsedtime": "0.001145", "type": "LOG", "step": "PARAMETER", "data": {"filter_length": 1024}}
+DLLL {"timestamp": "1670917011.73335", "datetime": "2022-12-13 15:36:51.733350", "elapsedtime": "0.001172", "type": "LOG", "step": "PARAMETER", "data": {"hop_length": 256}}
+DLLL {"timestamp": "1670917011.733379", "datetime": "2022-12-13 15:36:51.733379", "elapsedtime": "0.001201", "type": "LOG", "step": "PARAMETER", "data": {"win_length": 1024}}
+DLLL {"timestamp": "1670917011.733406", "datetime": "2022-12-13 15:36:51.733406", "elapsedtime": "0.001228", "type": "LOG", "step": "PARAMETER", "data": {"mel_fmin": 0.0}}
+DLLL {"timestamp": "1670917011.733434", "datetime": "2022-12-13 15:36:51.733434", "elapsedtime": "0.001256", "type": "LOG", "step": "PARAMETER", "data": {"mel_fmax": 8000.0}}
+DLLL {"timestamp": "1670917011.73346", "datetime": "2022-12-13 15:36:51.733460", "elapsedtime": "0.001282", "type": "LOG", "step": "PARAMETER", "data": {"rank": 0}}
+DLLL {"timestamp": "1670917011.733487", "datetime": "2022-12-13 15:36:51.733487", "elapsedtime": "0.001309", "type": "LOG", "step": "PARAMETER", "data": {"world_size": 1}}
+DLLL {"timestamp": "1670917011.733517", "datetime": "2022-12-13 15:36:51.733517", "elapsedtime": "0.001339", "type": "LOG", "step": "PARAMETER", "data": {"dist_url": "tcp://localhost:23456"}}
+DLLL {"timestamp": "1670917011.733544", "datetime": "2022-12-13 15:36:51.733544", "elapsedtime": "0.001366", "type": "LOG", "step": "PARAMETER", "data": {"group_name": "group_name"}}
+DLLL {"timestamp": "1670917011.73357", "datetime": "2022-12-13 15:36:51.733570", "elapsedtime": "0.001392", "type": "LOG", "step": "PARAMETER", "data": {"dist_backend": "nccl"}}
+DLLL {"timestamp": "1670917011.733597", "datetime": "2022-12-13 15:36:51.733597", "elapsedtime": "0.001419", "type": "LOG", "step": "PARAMETER", "data": {"bench_class": ""}}
+DLLL {"timestamp": "1670917011.733627", "datetime": "2022-12-13 15:36:51.733627", "elapsedtime": "0.001449", "type": "LOG", "step": "PARAMETER", "data": {"model_name": "Tacotron2_PyT"}}
+DLLL {"timestamp": "1670917018.827596", "datetime": "2022-12-13 15:36:58.827596", "elapsedtime": "7.095418", "type": "LOG", "step": [0, 0], "data": {"glob_iter/iters_per_epoch": "0/1250"}}
+DLLL {"timestamp": "1670917021.755682", "datetime": "2022-12-13 15:37:01.755682", "elapsedtime": "10.023504", "type": "LOG", "step": [0, 0], "data": {"train_loss": 0.0014972100034356117}}
+DLLL {"timestamp": "1670917024.653097", "datetime": "2022-12-13 15:37:04.653097", "elapsedtime": "12.920919", "type": "LOG", "step": [0, 0], "data": {"train_items_per_sec": 13732.530867138821}}
+DLLL {"timestamp": "1670917024.65323", "datetime": "2022-12-13 15:37:04.653230", "elapsedtime": "12.921052", "type": "LOG", "step": [0, 0], "data": {"train_iter_time": 5.82558311894536}}
+DLLL {"timestamp": "1670917024.653877", "datetime": "2022-12-13 15:37:04.653877", "elapsedtime": "12.921699", "type": "LOG", "step": [0, 1], "data": {"glob_iter/iters_per_epoch": "1/1250"}}
+DLLL {"timestamp": "1670917027.568372", "datetime": "2022-12-13 15:37:07.568372", "elapsedtime": "15.836194", "type": "LOG", "step": [0, 1], "data": {"train_loss": -0.032551057636737823}}
+DLLL {"timestamp": "1670917030.41401", "datetime": "2022-12-13 15:37:10.414010", "elapsedtime": "18.681832", "type": "LOG", "step": [0, 1], "data": {"train_items_per_sec": 13888.3907826584}}
+DLLL {"timestamp": "1670917030.414219", "datetime": "2022-12-13 15:37:10.414219", "elapsedtime": "18.682041", "type": "LOG", "step": [0, 1], "data": {"train_iter_time": 5.7602065820246935}}
+DLLL {"timestamp": "1670917030.414515", "datetime": "2022-12-13 15:37:10.414515", "elapsedtime": "18.682337", "type": "LOG", "step": [0, 2], "data": {"glob_iter/iters_per_epoch": "2/1250"}}

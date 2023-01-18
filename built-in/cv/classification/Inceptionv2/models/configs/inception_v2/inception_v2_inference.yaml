@@ -1,0 +1,32 @@
+# Training configuration for AlexNet trained on ImageNet on GPUs.
+# # Reaches > 56.5% within 100 epochs.
+# # Note: This configuration uses a scaled per-replica batch size based on the number of devices.
+
+model: 'inception_v2'
+pretrain:
+        path: "/algo_public/models/Classification/InceptionV2/pytorch/bn_inception-52deb4733.pth" #"/algo_public/models/Classification/AlexNet/pytorch/alexnet-owt-4df8aa71.pth"
+valid_dataset:
+        path: "/algo_public/datasets/imagenet/jpegs/val"
+        transform:
+                list:
+                  - "resize"
+                  - "centercrop"
+                  - "totensor"
+                  - "tospacebgr"
+                  - "torange255"
+                  - "normalize"
+                resize: 256
+                crop: 224
+                mean: 
+                  - 104
+                  - 117
+                  - 128
+                std:
+                  - 1
+                  - 1
+                  - 1
+valid:
+        batch_size: 256
+        workers: 1
+        shuffle: False
+        pin_memory: False
