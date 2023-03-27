@@ -106,20 +106,46 @@ source env.sh
 ```
 
 ### 数据集准备
-该P3D系列模型基于UCF101训练，数据集下载：<http://crcv.ucf.edu/data/UCF101/UCF101.rar>。数据集请放在` $PYTORCH_TRAIN_DATASET`目录下。目录结构为：
+该P3D系列模型基于UCF101训练。
 ```
-├── train
-│   ├── ApplyEyeMakeup
-│   ├── ApplyLipstick
-│   ├── ...
-├── val
-│   ├── ApplyEyeMakeup
-│   ├── ApplyLipstick
-│   ├── ...
+cd models/data
+wget http://crcv.ucf.edu/data/UCF101/UCF101.rar --no-check-certificate
+#建议创建一个文件夹保存UCF101.rar解压出来的avi视频文件
+mkdir avi
+#解压视频文件到avi文件夹下
+unrar e UCF101.rar avi/
+#开始制作数据集
+python movefile.py
+python makeVideoFolder.py
+python extract.py
+
+#根据训练代码需要，将train,test,validation，ucfTrainTestlist等训练需要的文件都放置于ucf101文件夹下
+mkdir ucf101
+mv train/ ucf101/
+mv test/ ucf101/
+mv validation/ ucf101/
+mv ucfTrainTestlist/ ucf101/
+```
+
+数据集请放在` $PYTORCH_TRAIN_DATASET`目录下。目录结构为：
+```
+ucf101/
 ├── test
 │   ├── ApplyEyeMakeup
-│   ├── ApplyLipstick
-│   ├── ...
+    ├── ApplyLipstick
+│   └── ...
+├── train
+│   ├── ApplyEyeMakeup
+    ├── ApplyLipstick
+│   └── ...
+├── ucfTrainTestlist
+│   ├── classInd.txt
+    ├── testlist01.txt
+│   └── ...
+└── validation
+    ├── ApplyEyeMakeup
+    ├── ApplyLipstick
+    └── ...
 ```
 
 ### Run 脚本执行
@@ -153,3 +179,4 @@ P3D 预训练模型下载链接：  \
 
 ## Release_Notes
 @TODO
+
