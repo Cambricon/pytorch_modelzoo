@@ -92,4 +92,23 @@ PyTorch ModelZoo 仅提供公共数据集以及预训练模型的下载链接，
 如果您不希望您的数据集或模型公布在 PyTorch ModelZoo上，或者您希望更新 PyTorch ModelZoo中属于您的数据集或模型，请您通过 Gitee 中提交 issue，您也可以联系ecosystem@cambricon.com告知我们。
 
 
+## Release Note
+### v0.2.0:
+- Cambricon Torch支持v1.13.0
 
+- CV: 新增enet网络的支持，MaskRCNN支持COCO2017数据集训练
+
+- NLP: 新增MT5网络的支持
+
+- Speech: 新增speechbrain网络的支持
+
+### v0.1.0:
+- Cambricon Torch支持v1.11.0
+
+- CV: 新增ResNet18/ResNet50/ResNet101/VGG16/VGG16_bn/VGG19/MobileNetv2/AlexNet/GoogLeNet/ShuffleNet_v2_x0_5/ShuffleNet_v2_x1_0/ShuffleNet_v2_x1_5/ngc-resnet50v1_5/Inceptionv2/Inceptionv3/Inceptionv4/OLTR/P3D/Swin-Transformer-SSL/swin_transformer/crnn/MaskRCNN/FasterRCNN/RFBNet/SSD_ResNet50/SSD_VGG16/PointPillar/unet3d/CycleGan_and_pix2pix网络的支持
+
+- NLP: 新增transformer/BERT/bert-base-cased/CRF/bert_base_finetune_msra_ner/DeepSpeech2网络的支持
+
+- SpeechSynthesis: 新增Tacotron2/WaveGlow/WaveRNN网络的支持
+
+- Recommendation: 新增DLRM网络的支持
