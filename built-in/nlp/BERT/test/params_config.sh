@@ -18,7 +18,9 @@ bert_msra_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="16"
     max_batch_size_MLU370="24"
-    max_batch_size_MLU590="24"
+    max_batch_size_MLU590_M9="96"
+    max_batch_size_MLU590_M9U="96"
+    max_batch_size_MLU590_H8="64"
     max_batch_size_MLU370_ECC="16"
     max_batch_size_V100="32"
     ddp="False"
@@ -64,7 +66,7 @@ set_configs () {
         iters=-1
         perf_iters_rule iters
         ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""

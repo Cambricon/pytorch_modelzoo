@@ -15,10 +15,10 @@ function usage () {
     echo "|             device: mlu, gpu"
     echo "|             option1(multicards): ddp"
     echo "|                                                   "
-    echo "|  eg.1. bash test_benchmark.sh -c fp32-mlu"
+    echo "|  eg.1. bash test_benchmark.sh fp32-mlu"
     echo "|      which means running RFBNet on single MLU card with fp32 precision."
     echo "|                                                   "
-    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh -c O1-mlu-ddp"
+    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh O1-mlu-ddp"
     echo "|      which means running RFBNet on 4 MLU cards with O1 precision."
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
@@ -41,23 +41,22 @@ else
 fi
 set_configs "$config"
 
-mkdir -p $PROJ_DIR/data/output/test_benchmark
-rm -rf $PROJ_DIR/data/output/test_benchmark/*
-rm -rf $PROJ_DIR/*.json
 export MASTER_ADDR='127.0.0.1'
 export MASTER_PORT=28881
 export OMP_NUM_THREADS=1 
 
 # train cmd
-run_cmd="RFBNet_train.py  \
+run_cmd="python RFBNet_train.py  \
         -d VOC -v RFB_vgg -s 300 \
+	$resume_opt $resume_path \
+	$distributed_flag --nprocessor $card_num \
+	--world_size $world_size --node_rank $node_rank \
+        --mode scratch --lr $lr \
+	--num_workers $num_workers \
+	--unit_in_iters \
+        --batch_size ${batch_size} --max $iters \
         --device mlu \
-        --batch_size ${batch_size} \
-        --nprocessor ${card_num} \
-        --save_folder $PROJ_DIR/data/output/test_benchmark \
-        --mode scratch \
-        -max $max_rounds \
-        --basenet ${PYTORCH_TRAIN_CHECKPOINT}rfbnet/checkpoints_fp/vgg16_reducedfc.pth"
+        --save_folder $output "
 
 # infer cmd
 check_cmd="RFBNet_infer.py -d VOC -v RFB_vgg -s 300 \
@@ -66,25 +65,21 @@ check_cmd="RFBNet_infer.py -d VOC -v RFB_vgg -s 300 \
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="VOC2007"
     pushd $RFBNet_DIR
-    # 配置DDP相关参数
-    if [[ $ddp == "True" ]]; then
-      run_cmd="${run_cmd} --distributed --node_rank 0 --world_size 1 "
-    fi
+    pip install -r requirements.txt
 
     # 配置混合精度相关参数
     if [[ ${precision} =~ ^O[0-3]{1}$ ]]; then  
       run_cmd="${run_cmd} --cnmix --opt_level ${precision} "
-      check_cmd="$check_cmd --cnmix --opt_level ${precision}"
     elif [[ ${precision} == "pyamp" ]]; then
       run_cmd="${run_cmd} --pyamp"
       echo "Using AMP Train"
     fi
 
     # 参数配置完毕，运行脚本
-    # To avoid system being overloaded in multicard training process, we need to limit the value of OMP_NUM_THREADS
     echo "$run_cmd"
-    eval "OMP_NUM_THREADS=1 python $run_cmd"
+    eval "${run_cmd}"
 
     # R2
     if [[ ${evaluate} == "True" ]]; then

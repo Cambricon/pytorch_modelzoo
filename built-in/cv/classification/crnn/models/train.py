@@ -31,7 +31,6 @@ try:
     if torch.is_mlu_available():
         import torch_mlu
         import torch_mlu.core.mlu_model as ct
-        import torch_mlu.core.mlu_quantize as qt
 except:
     print("Cambricon CATCH is not available!")
 
@@ -67,12 +66,32 @@ parser.add_argument('--cnmix', action='store_true', default=False, help='use cnm
 parser.add_argument('--opt_level', type=str, default='O1', help='choose level of mixing precision')
 parser.add_argument('--cudnn_lstm', action='store_true', help='if GPU, using cudnn LSTM; if MLU, using cnnl LSTM; otherwise using multi-operators')
 parser.add_argument('--start_epoch', type=int, default='0', help='first start epoch')
+parser.add_argument('--dummy_test', default=False, action='store_true', help='use dummy test for benchmark')
 
 opt = parser.parse_args()
 
 if opt.cnmix:
     import cnmix
 
+class dummy_data_loader():
+        # Synth90K: B,1,32,100, label is a B-item list of string with 1-5 characters
+        def __init__(self, len = 0, images_size = (1, 32, 100), batch_size = 16, class_length = 5):
+            self.len = len
+            self.images = torch.normal(mean = -0.03, std = 1.24, size = (batch_size,)+images_size)
+            self.target = ['1'*class_length]*batch_size  # target = ['11111', '11111',...]
+            self.data = 0
+        def __iter__(self):
+            return self
+        def __len__(self):
+            return self.len
+        def __next__(self):
+            if self.data > self.len:
+                raise StopIteration
+            else:
+                self.data+=1
+                return self.images, self.target
+        def next(self):
+                return self.__next__()
 
 def setup(rank, world_size, backend='nccl'):
     if os.getenv("MASTER_ADDR") is None:
@@ -238,7 +257,7 @@ def main_worker(rank, opt):
             image = image.to(ct.mlu_device(), non_blocking=True)
             crnn = crnn.to(ct.mlu_device(), non_blocking=True)
         else:
-            crnn.to(ct.mlu_device())
+            crnn = crnn.to(ct.mlu_device())
 
     # setup optimizer
     if opt.adam:
@@ -264,7 +283,7 @@ def main_worker(rank, opt):
             crnn = DDP(crnn, device_ids=[rank], find_unused_parameters=True)
             criterion = criterion.to(ct.mlu_device())
         else:
-            crnn = torch.nn.DataParallel(crnn, device_ids=range(opt.ngpu))
+            #crnn = torch.nn.DataParallel(crnn, device_ids=range(opt.ngpu))
             image = image.to(ct.mlu_device())
             criterion = criterion.to(ct.mlu_device())
 
@@ -395,6 +414,8 @@ def train(net, train_loader, test_dataset, criterion, optimizer, loss_avg, time_
             epoch_size = int(epoch_size / opt.ngpu)
     for epoch in range(opt.start_epoch + 1, opt.nepoch + 1):
         train_iter = iter(train_loader)
+        if opt.dummy_test:
+            train_iter = dummy_data_loader(batch_size=opt.batchSize, len=len(train_iter))
         i = 0
         batch_time_benchmark = []
         end = time.time()

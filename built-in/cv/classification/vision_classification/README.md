@@ -22,18 +22,18 @@ ShuffleNet_v2_x1_5  | PyTorch1.6 | MLU370-X8  | FP32  | Yes |
 ### 推理模型支持情况
 Models  | Framework  | Supported MLU   | Supported Data Precision   | Supported Infer Mode | 
 ----- | ----- | ----- | ----- | ----- |
-ResNet50  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL | 
-ResNet18  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL | 
-VGG16  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL | 
-MobileNetv2  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-AlexNet  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-GoogleNet  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-ResNet101  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-VGG19  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-VGG16_bn  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-ShuffleNet_v2_x0_5  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-ShuffleNet_v2_x1_0  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
-ShuffleNet_v2_x1_5  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | TorchMM/CNNL |
+ResNet50  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL | 
+ResNet18  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL | 
+VGG16  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL | 
+MobileNetv2  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+AlexNet  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+GoogleNet  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+ResNet101  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+VGG19  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+VGG16_bn  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+ShuffleNet_v2_x0_5  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+ShuffleNet_v2_x1_0  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
+ShuffleNet_v2_x1_5  | PyTorch1.6 | MLU370-S4/X4  | FP16/FP32  | CNNL |
 
 
 ## 默认参数配置
@@ -211,3 +211,4 @@ torchvision.models 模型代码链接：https://github.com/pytorch/vision/tree/v
 
 ## Release_Notes
 @TODO
+

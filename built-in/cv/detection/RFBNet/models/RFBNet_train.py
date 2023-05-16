@@ -17,7 +17,7 @@ import argparse
 import numpy as np
 from torch.autograd import Variable
 import torch.utils.data as data
-from data import VOCroot, VOCDetectionResult, VOC_300, VOC_512, COCO_mobile_300, AnnotationTransform, VOCDetection, detection_collate, BaseTransform, preproc
+from data import VOCroot, COCOroot, VOCDetectionResult, VOC_300, VOC_512, COCO_300, COCO_512, COCO_mobile_300, AnnotationTransform, COCODetection, VOCDetection, detection_collate, BaseTransform, preproc
 from layers.modules import MultiBoxLoss
 from layers.functions import PriorBox
 import time
@@ -240,6 +240,12 @@ class DataSetWrapper:
             train_sets = [('2007', 'trainval'), ('2012', 'trainval')]
             self.cfg = (VOC_300, VOC_512)[args.size == '512']
             self.dataset = VOCDetection(VOCroot, VOCDetectionResult, train_sets, preproc(self.img_dim, rgb_means, p), AnnotationTransform())
+            self.data_length = len(self.dataset)
+        elif dataset_type == 'COCO':
+            train_sets = [('2014', 'train'),('2014', 'valminusminival')]
+            self.cfg = (COCO_300, COCO_512)[args.size == '512']
+            self.dataset = COCODetection(COCOroot, train_sets, preproc(
+            self.img_dim, rgb_means, p))
             self.data_length = len(self.dataset)
         elif dataset_type == 'RFB_mobile':
             self.cfg = COCO_mobile_300

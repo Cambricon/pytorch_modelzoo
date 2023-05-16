@@ -131,7 +131,7 @@ def cpu_model(model, ten_x_train, ten_y_train, mask_train, test_data, x_test, y_
     return loss, per_word_err_cpu
 
 if __name__ == "__main__":
-    data.path.append(args.data)
+    data.path.append(args.data+'/treebank')
     sents = nltk.corpus.treebank.tagged_sents()
     print("==================data loading completed==================")
     max_len = 0

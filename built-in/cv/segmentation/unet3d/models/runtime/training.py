@@ -11,7 +11,7 @@ from runtime.logging import mllog_event, mllog_start, mllog_end, CONSTANTS
 import sys
 import os
 cur_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(cur_dir + "/../../../../../tools/utils/")
+sys.path.append(cur_dir + "/../../../../../../tools/utils/")
 from metric import MetricCollector
 
 try:

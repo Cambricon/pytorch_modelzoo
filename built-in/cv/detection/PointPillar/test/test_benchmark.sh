@@ -36,6 +36,7 @@ set_configs "$config"
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="nuscenes"
     if [[ ${evaluate} == "True" ]]; then
       run_cmd="python \
                -m torch.distributed.launch \
@@ -82,7 +83,8 @@ main() {
 
 # 编译pcdet包
 pushd $CUR_DIR/../models
-pip install -r requirements.txt
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+#pip install -r requirements.txt
 python setup.py develop
 
 # 清除历史训练数据

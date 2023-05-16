@@ -333,7 +333,7 @@ class Training(object):
             self.scaler = GradScaler()
 
         for epoch in range(self.start_epoch, self.epochs):
-            if self.distributed:
+            if self.distributed and not self.dummy_test:
                 self.train_loader.sampler.set_epoch(epoch)
             # self.adjust_learning_rate(epoch)
 

@@ -8,8 +8,6 @@ deepspeech2_base_params () {
     benchmark_mode="True"
     ddp="False"
     resume="True"
-    iters=-1
-    eval_iters=-1
     evaluate="False";
 }
 
@@ -50,7 +48,7 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
         batch_size=${!mbs_name}
 

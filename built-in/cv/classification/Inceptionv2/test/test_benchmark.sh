@@ -40,6 +40,8 @@ set_configs "$config"
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="ImageNet_2012"
+    pip install -r requirements.txt
     run_cmd="python src/train.py \
         --config configs/inception_v2/inception_v2_train_ddp_daily.yaml \
         --train-workers $num_workers \

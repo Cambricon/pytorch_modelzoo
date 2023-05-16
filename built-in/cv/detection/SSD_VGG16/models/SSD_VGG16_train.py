@@ -42,8 +42,6 @@ parser.add_argument('--dataset', default='VOC', choices=['VOC', 'COCO'],
                     type=str, help='VOC or COCO')
 parser.add_argument('--dataset_root', default=VOC_ROOT,
                     help='Dataset root directory path')
-parser.add_argument('--pretrained_path', default='vgg16_reducedfc.pth',
-                    help='Pretrained base model')
 parser.add_argument('--basenet', default='vgg16_reducedfc.pth',
                     help='Pretrained base model')
 parser.add_argument('--batch_size', default=32, type=int,
@@ -230,7 +228,7 @@ def train(dev_id, ndevs_per_node, args):
         if args.cnmix:
             load_cnmix_state_dict(cnmix, args.resume)
     else:
-        vgg_weights = torch.load(args.pretrained_path + args.basenet)
+        vgg_weights = torch.load(args.save_folder + args.basenet)
         print('Loading base network...')
         ssd_net.vgg.load_state_dict(vgg_weights)
 
@@ -301,8 +299,7 @@ def train(dev_id, ndevs_per_node, args):
         record_elapsed_time=True,
         record_hardware_time=True if args.device == 'mlu' else False)
     metric_collector.place()
-    save_frq = cfg['max_iter']
-    while iteration <= cfg['max_iter']:
+    while iteration < cfg['max_iter']:
         if args.visdom and iteration != 0 and (iteration % epoch_size == 0):
             update_vis_plot(epoch, loc_loss, conf_loss, epoch_plot, None,
                             'append', epoch_size)
@@ -361,7 +358,7 @@ def train(dev_id, ndevs_per_node, args):
                       repr(iteration) + ' || Loss: %.4f ||' % (loss.item()) +
                       ' timer: %.4f sec.' % (t1 - t0))
 
-            if iteration % save_frq == 0:
+            if iteration == cfg['max_iter']:
                 if (args.distributed == False) or (args.rank == 0):
                     if args.distributed:
                         state_dict = net.module.state_dict()
@@ -378,10 +375,10 @@ def train(dev_id, ndevs_per_node, args):
                     else:
                         save_pre = "cpu_weights"
                     print('Saving state, iter:', iteration)
-                    if not os.path.exists(args.save_folder):
-                        os.makedirs(args.save_folder)
-                    torch.save(state_dict, os.path.join(args.save_folder,save_pre + '_ssd300_VOC_' +
-                        repr(iteration) + '.pth'))
+                    if not os.path.exists(save_pre):
+                        os.makedirs(save_pre)
+                    torch.save(state_dict,save_pre + '/ssd300_VOC_' +
+                        repr(iteration) + '.pth')
                 break
         epoch += 1
     if ((args.distributed == False) or (args.rank == 0)) and os.getenv('AVG_LOG'):

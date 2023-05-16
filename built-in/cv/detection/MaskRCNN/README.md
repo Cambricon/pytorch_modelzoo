@@ -3,7 +3,7 @@
 
 - 该Sample包含PYTORCH MODELZOO MaskRCNN的训练和推理的实现。
 - MaskRCNN网络结构可参考GitHub链接：<https://github.com/facebookresearch/maskrcnn-benchmark>。
-- 基于COCO2014数据集训练脚本GitHub链接可参考：<https://github.com/facebookresearch/maskrcnn-benchmark/tools/train_net.py>
+- 基于COCO2017数据集训练脚本GitHub链接可参考：<https://github.com/facebookresearch/maskrcnn-benchmark/tools/train_net.py>
 
 
 ## **支持情况**
@@ -63,32 +63,32 @@ MaskRCNN  | PyTorch  | MLU370-S4/X4  | FP32  |
 ## **快速启动**
 
 ### **准备数据集**
-该MaskRCNN脚本基于coco2014训练，数据集下载方式：
+该MaskRCNN脚本基于coco2017训练，数据集下载方式：
 ```
-curl -O http://images.cocodataset.org/zips/train2014.zip; unzip train2014.zip
-curl -O http://images.cocodataset.org/zips/val2014.zip; unzip val2014.zip
-curl -O http://images.cocodataset.org/annotations/annotations_trainval2014.zip; unzip annotations_trainval2014.zip
+curl -O http://images.cocodataset.org/zips/train2017.zip; unzip train2017.zip
+curl -O http://images.cocodataset.org/zips/val2017.zip; unzip val2017.zip
+curl -O http://images.cocodataset.org/annotations/annotations_trainval2017.zip; unzip annotations_trainval2017.zip
 ```
 数据集目录结构为：
 ```
 ├── annotations
-│   ├── captions_train2014.json
-│   ├── captions_val2014.json
-│   ├── instances_train2014.json
-│   ├── instances_val2014.json
-│   ├── person_keypoints_train2014.json
-│   └── person_keypoints_val2014.json
+│   ├── captions_train2017.json
+│   ├── captions_val2017.json
+│   ├── instances_train2017.json
+│   ├── instances_val2017.json
+│   ├── person_keypoints_train2017.json
+│   └── person_keypoints_val2017.json
 ├── images
-│   ├── test2014 -> ../test2014/
-│   ├── train2014 -> ../train2014
-│   └── val2014 -> ../val2014/
-├── test2014
-├── train2014
-├── train2014.txt
-├── train2014.zip
-├── val2014
-├── val2014.shapes
-└── val2014.txt
+│   ├── test2017 -> ../test2017/
+│   ├── train2017 -> ../train2017
+│   └── val2017 -> ../val2017/
+├── test2017
+├── train2017
+├── train2017.txt
+├── train2017.zip
+├── val2017
+├── val2017.shapes
+└── val2017.txt
 ```
 
 ### **准备模型**

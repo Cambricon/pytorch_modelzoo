@@ -18,7 +18,5 @@ python -m torch.distributed.launch \
        --max_steps -1 \
        --device_param mlu \
        --do_eval \
-       --cnmix \
-       --fp16_opt_level O0 \
        --overwrite_output_dir
 popd

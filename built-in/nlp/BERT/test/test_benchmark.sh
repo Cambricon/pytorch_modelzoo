@@ -73,7 +73,7 @@ run_cmd="${train_script}  \
 
 # config配置到网络脚本的转换
 main() {
-
+    export DATASET_NAME="SQUAD_V1.1"
     pushd $BERT_DIR
     # 配置DDP相关参数
     if [[ $ddp == "True" ]]; then

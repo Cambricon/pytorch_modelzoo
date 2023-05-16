@@ -16,7 +16,9 @@ base_params () {
 
     max_batch_size_MLU290="256"
     max_batch_size_MLU370="480"
-    max_batch_size_MLU590="480"
+    max_batch_size_MLU590_M9="1560"
+    max_batch_size_MLU590_M9U="1560"
+    max_batch_size_MLU590_H8="1280"
     max_batch_size_MLU370_ECC="384"
     max_batch_size_V100="256"
 }

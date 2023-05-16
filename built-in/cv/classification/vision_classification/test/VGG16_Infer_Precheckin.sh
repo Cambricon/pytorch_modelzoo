@@ -15,7 +15,6 @@ python $CUR_DIR/../classify_infer.py \
 	--network vgg16 \
 	--batch_size 64 \
 	--device mlu \
-	--fusion_backend torch2mm \
 	--input_data_type float32 \
 	--data $IMAGENET_TRAIN_DATASET \
 	-j 12 \

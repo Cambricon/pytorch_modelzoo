@@ -10,15 +10,15 @@ function usage () {
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
     echo "|  bash $0 precision-device-[options...]"
     echo "|      Supported options:"
-    echo "|             precision: fp32, O0, O1, O2, O3, amp"
+    echo "|             precision: fp32, amp"
     echo "|             device: mlu, gpu"
     echo "|             option1(multicards): ddp"
     echo "|                                                   "
     echo "|  eg.1. bash test_benchmark.sh fp32-mlu"
     echo "|      which means running DLRM net on single MLU card with fp32 precision."
     echo "|                                                   "
-    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh O1-mlu-ddp"
-    echo "|      which means running DLRM net on 4 MLU cards with O1 precision."
+    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh fp32-mlu-ddp"
+    echo "|      which means running DLRM net on 4 MLU cards with fp32 precision."
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
 
@@ -59,8 +59,9 @@ fi
 
 # config配置到网络脚本的转换
 main() {
-
+    export DATASET_NAME="MovieLens"
     pushd $DLRM_DIR
+    pip install -r requirements.txt 
     # 配置卡数
     if [[ $ddp == "True" ]]; then
         get_visible_cards

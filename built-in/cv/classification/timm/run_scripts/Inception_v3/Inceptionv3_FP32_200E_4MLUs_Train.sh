@@ -22,7 +22,7 @@ OUTPUT_DIR=$PTH_AND_LOG_DIR
 
 export WORLD_SIZE=4
 export MASTER_ADDR=localhost
-export MASTER_PORT=312136
+export MASTER_PORT=32136
 
 python -m torch.distributed.launch --nproc_per_node=4  --master_port $MASTER_PORT   \
           train.py                    \

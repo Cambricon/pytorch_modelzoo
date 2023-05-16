@@ -15,13 +15,31 @@ function usage () {
     echo "|             device: mlu, gpu"
     echo "|             option1(multicards): ddp"
     echo "|                                                   "
-    echo "|  eg.1. bash test_benchmark.sh -c fp32-mlu"
+    echo "|  eg.1. bash test_benchmark.sh fp32-mlu"
     echo "|      which means running bert_msra net on single MLU card with fp32 precision."
     echo "|                                                   "
-    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh -c O1-mlu-ddp"
+    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh O1-mlu-ddp"
     echo "|      which means running bert_msra net on 4 MLU cards with O1 precision."
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
+
+CORPORA_PATH=${TRANS_DIR}/corpora
+CKPT_MODEL_PATH=${TRANS_DIR}/ckpt_model
+if [ -z ${IWSLT_CORPUS_PATH} ]; then
+  echo "please set environment variable IWSLT_CORPUS_PATH."
+  exit 1
+fi
+if [ -z ${TRANSFORMER_CKPT} ]; then
+  echo "please set environment variable TRANSFORMER_CKPT."
+  exit 1
+fi
+
+if [ ! -d ${CORPORA_PATH} ]; then
+  ln -s ${IWSLT_CORPUS_PATH} ${CORPORA_PATH}
+fi
+if [ ! -d ${CKPT_MODEL_PATH} ]; then
+  ln -s ${TRANSFORMER_CKPT} ${CKPT_MODEL_PATH}
+fi
 
 # 获取用户指定config函数并执行,得到对应config的参数配置
 config_file=""
@@ -54,13 +72,14 @@ run_cmd="train.py  \
   --dropout_rate 0.0"
 
 check_cmd="eval.py \
---pretrained ${CKPT_MODEL_PATH}/model_epoch_09.pth \
+--pretrained ${TRANS_DIR}/models/model_epoch_10.pth \
 --device $device"
 
 # config配置到网络脚本的转换
 main() {
-
+    export DATASET_NAME="IWSLT2016"
     pushd $TRANS_DIR
+    pip install -r requirements.txt
     # 配置DDP相关参数
     if [[ $ddp == "True" ]]; then
       run_cmd="$run_cmd --distributed"

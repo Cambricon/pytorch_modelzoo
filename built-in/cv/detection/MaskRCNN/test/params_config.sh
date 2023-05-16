@@ -12,16 +12,20 @@ base_params () {
     lr="0.0025"
     precision="fp32"
     ddp="False"
-    card_num=4
-    num_workers="4"
+    card_num=1
+    num_workers="0"
     evaluate="False";
 
-    benchmark_mode="False"
+    benchmark_mode="True"
     max_batch_size_MLU290="2"
     max_batch_size_MLU370="4"
-    max_batch_size_MLU590="4"
+    max_batch_size_MLU590_M9="16"
+    max_batch_size_MLU590_M9U="16"
+    max_batch_size_MLU590_H8="16"
     max_batch_size_MLU370_ECC="4"
     max_batch_size_V100="2"
+
+    ckpt="${PYTORCH_TRAIN_CHECKPOINT}/rcnn/basenet/R-101.pkl"
 }
 
 set_configs () {
@@ -37,10 +41,13 @@ set_configs () {
         case "$var" in
             fp32)   ;;
             O[0-3]) precision=$var ;;
+            amp)    precision="amp" ;;
             mlu)    ;;
             gpu)    device="gpu" ;;
-            ddp)    ddp="True";;
-            ci)     benchmark_mode=True;
+            ddp)    ddp="True";
+		    base_iters=10000;
+                    ckpt="${PYTORCH_TRAIN_CHECKPOINT}/rcnn/maskrcnn/checkpoints_fp/model_0010000.pth";;
+            ci)     benchmark_mode=False;
                     evaluate="True" ;;
             *) echo "Unrecognized option: " $var; exit 1;;
         esac
@@ -69,10 +76,10 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
-        export BENCHMARK_LOG=${CONFIG_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CONFIG_DIR}/../../../../benchmark_log
         
         cur_ecc_status=""
         get_ecc_status cur_ecc_status

@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 from collections import OrderedDict
 from torch.cuda.amp import autocast, GradScaler
+from dataloaders import *
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(cur_dir + "/../../../../tools/utils/")
@@ -38,8 +39,20 @@ parser.add_argument('-m', '--modeldir', type=str, default='./', metavar='DIR',
                         help='path to dir of models and mlu operators, default is ./ and from torchvision')
 parser.add_argument('--data', default="./imagenet",
                         type=str, metavar='DIR', help='path to dataset')
+parser.add_argument( "--data-backend", metavar="BACKEND", default="pytorch", choices=DATA_BACKEND_CHOICES,
+                        help="data backend: "
+                        + " | ".join(DATA_BACKEND_CHOICES)
+                        + " (default: dali-cpu)",)
+parser.add_argument("--interpolation",
+                        metavar="INTERPOLATION",
+                        default="bilinear",
+                        help="interpolation type for resizing images: bilinear, bicubic or triangular(DALI only)",
+                        )
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                         help='number of data loading works (default: 4)')
+parser.add_argument("--prefetch", default=2, type=int, metavar="N",
+                        help="number of samples prefetched by each loader",
+                        )
 parser.add_argument('--epochs', default=1, type=int, metavar='N',
                         help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
@@ -238,14 +251,32 @@ def main_worker(dev_id, ndevs_per_node, args):
         else:
             train_sampler = None
 
-
-    train_loader = torch.utils.data.DataLoader(
-            train_dataset,
-            batch_size=args.batch_size,
-            shuffle=(train_sampler is None),
-            sampler=train_sampler,
-            num_workers=args.workers,
-            pin_memory=True)
+    if args.data_backend == "pytorch":
+        train_loader = torch.utils.data.DataLoader(
+                train_dataset,
+                batch_size=args.batch_size,
+                shuffle=(train_sampler is None),
+                sampler=train_sampler,
+                num_workers=args.workers,
+                pin_memory=True)
+        train_loader_len=len(train_loader)
+    elif args.data_backend == "dali-mlu":
+        get_train_loader = get_dali_train_loader(dali_cpu = False)
+        train_loader, train_loader_len = get_train_loader(
+                args.data,
+                224, # image_size
+                args.batch_size,
+                1000, # num_classes
+                False, # one_hot
+                interpolation=args.interpolation,
+                augmentation=None, # augmentation
+                start_epoch=args.start_epoch,
+                workers=args.workers,
+                _worker_init_fn=lambda:None, # gpu has will set affinity here, well for mlu...
+                prefetch_factor=args.prefetch,
+                device = 'mlu',
+                )
+    args.train_loader_len = train_loader_len
 
     val_loader = torch.utils.data.DataLoader(
             datasets.ImageFolder(valdir, transforms.Compose([
@@ -347,7 +378,7 @@ def main_worker(dev_id, ndevs_per_node, args):
 
     if args.device == 'mlu' and args.cnmix:
        cnmix.cnmix_set_amp_quantify_params('all', {'batch_size': args.batch_size,
-                                                   'data_num': args.batch_size * len(train_loader)})
+                                                   'data_num': args.batch_size * args.train_loader_len})
 
     next_eval_at = args.start_eval_at
     # Train epochs, We save epoch at the start, to make sure DDP-Reduce finished on each Process
@@ -433,11 +464,11 @@ def train(train_loader, model, criterion, optimizer, epoch, scaler, args):
     losses     = AverageMeter('Loss' , ':.4e' )
     top1       = AverageMeter('Acc@1', ':6.2f')
     
-    pid_num = os.getpid()
+    #pid_num = os.getpid()
 
     progress   = ProgressMeter(
-                   len(train_loader),
-                   [ batch_time, data_time, losses, top1, pid_num ],
+                   args.train_loader_len,
+                   [ batch_time, data_time, losses, top1],
                    prefix='[{}]'.format(epoch))
 
     loss_columns = []
@@ -449,7 +480,7 @@ def train(train_loader, model, criterion, optimizer, epoch, scaler, args):
     model.train()
     end = time.time()
     if args.dummy_test:
-        train_loader = dummy_data_loader(len = len(train_loader), batch_size = args.batch_size)
+        train_loader = dummy_data_loader(len = args.train_loader_len, batch_size = args.batch_size)
     # for internal benchmark test
     metric_collector = MetricCollector(
         enable_only_benchmark=True,
@@ -460,9 +491,9 @@ def train(train_loader, model, criterion, optimizer, epoch, scaler, args):
     for i, (images, target) in enumerate(train_loader):
         data_time.update(time.time() -end)
         if args.arch == "mobilenet_v2":
-            adjust_learning_rate_cos(optimizer, epoch, i, len(train_loader), args)
+            adjust_learning_rate_cos(optimizer, epoch, i, args.train_loader_len, args)
         if args.arch in ["shufflenet_v2_x0_5", "shufflenet_v2_x1_0", "shufflenet_v2_x1_5"]:
-            adjust_learning_rate_poly_warmup(optimizer, epoch, i, len(train_loader), args)
+            adjust_learning_rate_poly_warmup(optimizer, epoch, i, args.train_loader_len, args)
         if i == args.iters:
             break
         if not args.dummy_test:

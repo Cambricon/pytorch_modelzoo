@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+#set -e
 # env
 CUR_DIR=$(cd $(dirname $0);pwd)
 SSD_ResNet50_DIR=$(cd ${CUR_DIR}/../models;pwd)
@@ -23,6 +23,15 @@ function usage () {
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
 
+if [ -z ${COCO2017_TRAIN_DATASET} ]; then
+  echo "please set environment variable COCO2017_TRAIN_DATASET."
+  exit 1
+fi
+
+if [ -z ${PYTORCH_TRAIN_CHECKPOINT} ]; then
+  echo "please set environment variable PYTORCH_TRAIN_CHECKPOINT."
+  exit 1
+fi
 # 获取用户指定config函数并执行,得到对应config的参数配置
 config_file=""
 while getopts 'hc:' opt; do
@@ -41,60 +50,60 @@ else
 fi
 set_configs "$config"
 
-mkdir -p $PROJ_DIR/data/output/test_benchmark
-rm -rf $PROJ_DIR/data/output/test_benchmark/*
-rm -rf $PROJ_DIR/*.json
-
 # train cmd
 run_cmd="SSD_ResNet50_train.py  \
 --backbone resnet50 \
---backbone-path ${PYTORCH_TRAIN_CHECKPOINT}ssd/resnet50-19c8e357.pth \
+--checkpoint $PYTORCH_TRAIN_CHECKPOINT/ssd/epoch_31.pt \
+--backbone-path ${PYTORCH_TRAIN_CHECKPOINT}/ssd/resnet50-19c8e357.pth \
 --bs ${batch_size} \
---warmup ${warmup} \
---save $PROJ_DIR/data/output/test_benchmark \
---data $COCO2017_TRAIN_DATASET \
---iterations 50 \
---epochs ${num_epochs} \
---json-summary $PROJ_DIR/data/output/test_benchmark.json"
+--seed $seed --epochs 33 --iterations $iters \
+--device $device \
+--save ./models --num-workers $num_workers \
+--data $COCO2017_TRAIN_DATASET "
 
 # infer cmd
 check_cmd="SSD_ResNet50_infer.py \
         --backbone resnet50 \
         --backbone-path ${PYTORCH_TRAIN_CHECKPOINT}ssd/resnet50-19c8e357.pth \
-        --bs ${batch_size} \
-        --warmup 300 \
-        --mode evaluation \
-        --checkpoint $PROJ_DIR/data/output/test_benchmark/last.pt \
-        --data $COCO2017_TRAIN_DATASET \
-        --input_data_type float32 \
-        --json-summary test_benchmark.json"
+	--checkpoint ./models/epoch_32.pt \
+        --bs ${batch_size} --device $device \
+        --mode evaluation --eval_iters $eval_iters \
+        --data $COCO2017_TRAIN_DATASET "
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="COCO2017"
     pushd $SSD_ResNet50_DIR
+    pip install Cython==0.28.4
+    pip install -r requirements.txt
     # 配置DDP相关参数
     if [[ $ddp == "True" ]]; then
-      run_cmd="-m torch.distributed.launch --nproc_per_node=${nproc_per_node} --master_port=25002 $run_cmd"
+      run_cmd="python -m torch.distributed.launch --nproc_per_node=$DEVICE_COUNT  $run_cmd --warmup 300"
+    else
+      run_cmd="python $run_cmd --warmup 32"
     fi
 
     # 配置混合精度相关参数
     if [[ ${precision} =~ ^O[0-3]{1}$ ]]; then  
       run_cmd="${run_cmd} --cnmix --opt_level ${precision} "
-      check_cmd="$check_cmd --cnmix --opt_level ${precision}"
-    elif [[ ${precision} == "pyamp" ]]; then
+    elif [[ ${precision} == "amp" ]]; then
       run_cmd="${run_cmd} --pyamp"
       echo "Using AMP Train"
+    fi
+
+    if [[ ${cur_platform%_*} == "MLU590" ]]; then
+	run_cmd="${run_cmd} --data-backend dali-mlu"
     fi
 
     # 参数配置完毕，运行脚本
     # To avoid system being overloaded in multicard training process, we need to limit the value of OMP_NUM_THREADS
     echo "$run_cmd"
-    eval "OMP_NUM_THREADS=1 python $run_cmd"
+    eval "$run_cmd"
 
     # R2
     if [[ ${evaluate} == "True" ]]; then
-      echo $check_cmd
-      eval "python $check_cmd"
+      echo "val_cmd: $check_cmd"
+      eval "$check_cmd"
     fi
     popd
 }

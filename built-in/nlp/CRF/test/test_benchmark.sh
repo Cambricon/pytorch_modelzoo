@@ -44,7 +44,9 @@ fi
 run_cmd="python main.py --device $device --iters $iters --data $CRF_DATASET"
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="Treebank"
     pushd ${CRF_DIR}
+    pip install -r requirements.txt
 
     # 配置混合精度相关参数
     if [[ ${precision} =~ ^O[0-3]{1}$ ]]; then

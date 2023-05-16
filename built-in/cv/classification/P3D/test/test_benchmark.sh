@@ -38,6 +38,7 @@ set_configs "$config"
 
 # start train network
 main() {
+    export DATASET_NAME="UCF101"
     run_cmd="$CUR_DIR/../models/main.py \
              $dataset \
              --train_steps $train_steps \
@@ -75,6 +76,11 @@ main() {
       run_cmd="$run_cmd --cnmix --opt_level ${precision} "
     elif [[ ${precision} == "amp" ]]; then
       run_cmd="${run_cmd} --pyamp" 
+    fi
+
+    # dummy_test
+    if [[ ${dummy_test} == "True" ]]; then
+      run_cmd="$run_cmd --dummy_test"
     fi
 
     if [[ ${benchmark_mode} == True ]]; then

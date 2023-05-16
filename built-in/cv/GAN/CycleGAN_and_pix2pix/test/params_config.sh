@@ -15,7 +15,9 @@ base_params () {
     max_batch_size_MLU370="40"
     max_batch_size_MLU370_ECC="40"
     max_batch_size_V100="32"
-    max_batch_size_MLU590="120"
+    max_batch_size_MLU590_M9="120"
+    max_batch_size_MLU590_M9U="120"
+    max_batch_size_MLU590_H8="120"
 
     resume="True"
     evaluate="False"
@@ -58,7 +60,7 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
         batch_size=${!mbs_name}
 

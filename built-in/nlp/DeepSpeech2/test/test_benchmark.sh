@@ -13,7 +13,7 @@ function usage () {
     echo "|             device: mlu, gpu"
     echo "|             option1(multicards): ddp"
     echo "|                                                   "
-    echo "|  eg.1. bash test_benchmark.sh -c fp32-mlu"
+    echo "|  eg.1. bash test_benchmark.sh fp32-mlu"
     echo "|      which means running DeepSpeech2 on single MLU card with fp32 precision."
     echo "|                                                   "
     echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh fp32-mlu-ddp"
@@ -43,10 +43,14 @@ fi
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="LJSpeech-1.1"
+    # 安装依赖库
+    pushd $NET_ROOT_DIR
+    pip install -r requirements.txt
+    popd
+
     pushd $NET_ROOT_DIR/pytorch
     # ddp_params=""
-    # 安装依赖库
-    pip install -r $NET_ROOT_DIR/requirements.txt
     save_folder="./models"
     model_path="./models/deepspeech2_final.pth.tar"
     run_cmd="train.py \
@@ -55,8 +59,7 @@ main() {
              --model_path  $model_path \
              --num_workers $num_workers \
              --checkpoint               \
-             --iters       $iters \
-             --eval_iters  $eval_iters"
+             --iters       $iters" 
     if [[ $ddp == "True" ]];then
         ddp_params="-m torch.distributed.launch --nproc_per_node=${cards_num}"
     fi
@@ -85,7 +88,7 @@ main() {
 
 pushd $CUR_DIR
 if [ ! -d "../models/LibriSpeech_dataset" ]; then
-  ln -s $PYTORCH_TRAIN_DATASET/LibriSpeech_dataset  ../../
+  ln -s $PYTORCH_TRAIN_DATASET/LibriSpeech_dataset  ../models/
 fi
 main
 popd

@@ -62,8 +62,6 @@ def get_args():
     parser.add_argument('--qint', default='no_quant', dest='qint', choices = ['int8', 'int16', 'no_quant'])
     parser.add_argument('--quant_batch_num', default = 5, dest='quant_batch_num', type=int,
                         help='Set image numbers to evaluate quantized params, default is 5.')
-    parser.add_argument('--fusion_backend', default = 'no',
-                        choices = ['no', 'torch2trt', 'torch2mm'])
     parser.add_argument('--ckpt', type=str, help = "model checkpoint file")
     parser.add_argument('--only_genoff', help = "only generate torchscript model", default = False, type=str2bool)
     parser.add_argument('--offline_model_path', help = "torchscript offline model path", type = str)
@@ -234,133 +232,10 @@ def test_cls_network(args):
         device = torch.device('cuda')
     else:
         device = torch.device('cpu')
-    if not args.only_genoff and args.offline_model_path:
-        if args.fusion_backend == "torch2trt":
-            import torch_tensorrt
-        model = torch.jit.load(args.offline_model_path)
-        model.to(device)
-    elif args.fusion_backend == "torch2mm":
-        assert args.device == "mlu", "torch2mm fusion backend only support on mlu device type"
-        import torch_mlu.core.mlu_model as ct
-        example_input = torch.randn(args.batch_size, 3, in_h, in_w)
-        trace_model = torch.jit.trace(net, example_input, check_trace = False)
-        inputs = [
-            torch_mlu.Input(
-                (args.batch_size, 3, in_h, in_w),
-                dtype=torch.float32,
-                format = torch.contiguous_format
-            )
-        ]
 
-        calibrator = torch_mlu.ptq.DataLoaderCalibrator(
-            calib_loader,
-            algo_type=torch_mlu.ptq.CalibrationAlgo.LINEAR_CALIBRATION,
-            max_calibration_samples = args.quant_batch_num * args.batch_size
-        )
-        if args.input_data_type == "float16":
-            enabled_precisions = {torch.half}
-        else:
-            enabled_precisions = {torch.float}
-        if args.qint == "int8":
-            enabled_precisions.add(torch.int8)
-        elif args.qint == "int16":
-            enabled_precisions.add(torch.int16)
-
-        compile_spec = {
-            "inputs" : inputs,
-            "device": {"mlu_id": 0},
-            "enabled_precisions" : enabled_precisions,
-            "truncate_long_and_double" : True,
-        }
-        if args.qint != "no_quant":
-            compile_spec.update({"calibrator" : calibrator})
-        print("compile_spec is ", compile_spec)
-        model = torch_mlu.ts.compile(trace_model, **compile_spec)
-        if args.only_genoff:
-            torch.jit.save(model, args.offline_model_path)
-            sys.exit(0)
-
-    elif args.fusion_backend == "torch2trt":
-        assert args.device == "gpu"
-        if args.qint == "int16":
-            assert False, "torch2trt don't support int16 calibration"
-        if args.input_data_type == "float16":
-            assert args.qint == "no_quant", "torch2trt don't support fp16+int8"
-        import torch_tensorrt
-        # user defined calibrator, because coco dataloader is differenct with default dataloader
-        class TRTCalibrator(torch_tensorrt._C.IInt8MinMaxCalibrator):
-            def __init__(self, dataloader, batch_num = 1, **kwargs):
-                super(TRTCalibrator, self).__init__()
-                self.cache_file = kwargs.get("cache_file", None)
-                self.use_cache = kwargs.get("use_cache", False)
-                self.device = kwargs.get("device", torch.device("cuda:0"))
-                self.dataloader = dataloader
-                self.dataset_iterator = iter(dataloader)
-                self.batch_size = dataloader.batch_size
-                self.batch_num = batch_num
-                self.current_batch_idx = 0
-
-            def get_batch_size(self):
-                return self.batch_size
-
-            def get_batch(self, names):
-                if self.current_batch_idx >= self.batch_num:
-                    return None
-                imgs, labels = self.dataset_iterator.next()
-                imgs = imgs.to(self.device)
-                self.current_batch_idx += 1
-                return [imgs.data_ptr()]
-
-            def read_calibration_cache(self):
-                if self.use_cache:
-                    with open(self.cache_file ,'rb') as f:
-                        return f.read()
-                else:
-                    return b""
-
-            def write_calibration_cache(self, cache):
-                if self.cache_file:
-                    with open(self.cache_file, 'wb') as f:
-                        f.write(cache)
-                else:
-                    return b""
-
-        example_input = torch.randn(args.batch_size, 3, in_h, in_w)
-        trace_model = torch.jit.trace(net, example_input, check_trace = True)
-        trace_model.cuda()
-        if args.input_data_type == "float16":
-            trace_model.half()
-        inputs = [
-            torch_tensorrt.Input((args.batch_size, 3, in_h, in_w),
-                dtype = torch.half if args.input_data_type == "float16" else torch.float,
-                format = torch.contiguous_format
-            )
-        ]
-
-        calibrator = TRTCalibrator(calib_loader, batch_num = args.quant_batch_num)
-        if args.input_data_type == "float16":
-            enabled_precisions = {torch.half}
-        else:
-            enabled_precisions = {torch.float}
-            if args.qint == "int8":
-                enabled_precisions.add(torch.int8)
-        compile_spec = {
-            "inputs" : inputs,
-            "enabled_precisions" : enabled_precisions,
-            "truncate_long_and_double" : True,
-            "workspace_size" : MAX_WORKSPACE_SIZE,
-        }
-        if args.qint == "int8":
-            compile_spec.update({"calibrator" : calibrator})
-        model = torch_tensorrt.compile(trace_model,**compile_spec)
-        if args.only_genoff:
-            torch.jit.save(model, args.offline_model_path)
-
-            sys.exit(0)
-    else:
-        model = net.to(device)
-        if args.input_data_type == "float16":
-            model = model.half()
+    model = net.to(device)
+    if args.input_data_type == "float16":
+        model = model.half()
 
     batch_time = AverageMeter('Batch Time', ':6.3f', Summary.AVERAGE)
     top1 = AverageMeter('Acc@1', ':6.2f', Summary.AVERAGE)

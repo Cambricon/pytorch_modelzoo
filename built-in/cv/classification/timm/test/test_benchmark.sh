@@ -83,6 +83,11 @@ main() {
                  --aa $aa \
                  --lr-noise $lr_noise"
     fi
+    # dummy test
+    if [[ ${dummy_test} == "True" ]]; then
+      run_cmd="$run_cmd --dummy_test"
+    fi
+
 
     # 配置DDP相关参数
     if [[ $ddp == "True" ]]; then

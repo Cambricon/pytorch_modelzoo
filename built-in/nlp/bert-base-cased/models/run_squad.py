@@ -65,10 +65,6 @@ cur_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(cur_dir + "/../../../../tools/utils/")
 from metric import MetricCollector
 
-try:
-    import cnmix
-except ImportError:
-    print("train without cnmix")
 
 logger = logging.getLogger(__name__)
 
@@ -128,19 +124,13 @@ def train(args, train_dataset, model, tokenizer):
         scheduler.load_state_dict(torch.load(os.path.join(args.model_name_or_path, "scheduler.pt")))
 
 
-    if not getattr(args, 'cnmix', False) and args.fp16:
+    if args.fp16:
         try:
             from apex import amp
         except ImportError:
             raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
 
         model, optimizer = amp.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-
-    if getattr(args, 'cnmix', False) and args.device_param == 'mlu':
-        model, optimizer = cnmix.initialize(model, optimizer, opt_level=args.fp16_opt_level)
-        cnmix.core.cnmix_set_amp_quantify_params('all', {'batch_size': args.train_batch_size,
-                                                         'data_num': args.train_batch_size * len(train_dataloader)})
-
 
     # multi-gpu training (should be after apex fp16 initialization)
     # if args.n_device > 1:
@@ -237,7 +227,7 @@ def train(args, train_dataset, model, tokenizer):
                         {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
                     )
             with autocast(enabled=args.amp):
-                outputs = model(**inputs)
+                outputs = model(**inputs, return_dict=False)
                 # model outputs are always tuple in transformers (see doc)
                 loss = outputs[0]
                 if args.n_device > 1:
@@ -247,10 +237,7 @@ def train(args, train_dataset, model, tokenizer):
 
             if args.amp:
                 scaler.scale(loss).backward()
-            elif args.cnmix:
-                with cnmix.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            elif not args.cnmix and args.fp16:
+            elif args.fp16:
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
@@ -263,7 +250,7 @@ def train(args, train_dataset, model, tokenizer):
             metric_collector.place()
 
             if (step + 1) % args.gradient_accumulation_steps == 0:
-                if not args.cnmix and args.fp16:
+                if args.fp16:
                     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), args.max_grad_norm)
                 else:
                     torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
@@ -288,7 +275,7 @@ def train(args, train_dataset, model, tokenizer):
         metric_collector.insert_metrics(
             net = "bert-base-cased",
             batch_size = args.train_batch_size,
-            precision = args.fp16_opt_level if args.cnmix or args.amp else "fp32",
+            precision = args.fp16_opt_level if args.amp else "fp32",
             cards = 1 if not torch.distributed.is_initialized() else int(os.environ["WORLD_SIZE"]),
             DPF_mode = "ddp" if args.local_rank != -1 else "single")
 
@@ -355,7 +342,7 @@ def evaluate(args, model, tokenizer, prefix=""):
                     inputs.update(
                         {"langs": (torch.ones(batch[0].shape, dtype=torch.int64) * args.lang_id).to(args.device)}
                     )
-            outputs = model(**inputs)
+            outputs = model(**inputs, return_dict=False)
 
         for i, feature_index in enumerate(feature_indices):
             eval_feature = features[feature_index.item()]
@@ -686,7 +673,6 @@ def main():
         "--overwrite_cache", action="store_true", help="Overwrite the cached training and evaluation sets"
     )
     parser.add_argument("--seed", type=int, default=42, help="random seed for initialization")
-
     parser.add_argument("--local_rank", type=int, default=-1, help="local_rank for distributed training on gpus")
     parser.add_argument(
         "--fp16",
@@ -699,11 +685,6 @@ def main():
         default="O1",
         help="For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
         "See details at https://nvidia.github.io/apex/amp.html",
-    )
-    parser.add_argument(
-        "--cnmix",
-        action="store_true",
-        help="use CAMBRICON cnmix for precision training"
     )
     parser.add_argument('--amp', action='store_true', default=False,
                     help='use pytorch amp for mixed precision training')
@@ -788,6 +769,7 @@ def main():
         args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
         do_lower_case=args.do_lower_case,
         cache_dir=args.cache_dir if args.cache_dir else None,
+        use_fast=False
     )
     model = AutoModelForQuestionAnswering.from_pretrained(
         args.model_name_or_path,
@@ -807,7 +789,7 @@ def main():
     # Before we do anything with models, we want to ensure that we get fp16 execution of torch.einsum if args.fp16 is set.
     # Otherwise it'll default to "promote" mode, and we'll get fp32 operations. Note that running `--fp16_opt_level="O2"` will
     # remove the need for this code, but it is still valid.
-    if not getattr(args, 'cnmix', False) and args.fp16:
+    if args.fp16:
         try:
             import apex
 
@@ -832,7 +814,6 @@ def main():
         # They can then be reloaded using `from_pretrained()`
         # Take care of distributed/parallel training
         model_to_save = model.module if hasattr(model, "module") else model
-        #mlu_quantize.dequantize(model_to_save)
         model_to_save.save_pretrained(args.output_dir)
         tokenizer.save_pretrained(args.output_dir)
 
@@ -841,7 +822,7 @@ def main():
 
         # Load a trained model and vocabulary that you have fine-tuned
         model = AutoModelForQuestionAnswering.from_pretrained(args.output_dir)  # , force_download=True)
-        tokenizer = AutoTokenizer.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
+        tokenizer = AutoTokenizer.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case, use_fast=False)
         model.to(args.device)
 
     # Evaluation - we can ask to evaluate all the checkpoints (sub-directories) in a directory

@@ -5,6 +5,7 @@ CONFIG_DIR=$(cd $(dirname $0);pwd)
 bert_msra_base_params () {
     device="mlu"
 
+    num_data="40960"
     batch_size="30"
     run_epochs="1"
     precision="fp32"
@@ -17,7 +18,9 @@ bert_msra_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="30"
     max_batch_size_MLU370="40"
-    max_batch_size_MLU590="40"
+    max_batch_size_MLU590_M9="256"
+    max_batch_size_MLU590_M9U="256"
+    max_batch_size_MLU590_H8="160"
     max_batch_size_MLU370_ECC="40"
     max_batch_size_V100="30"
 
@@ -59,11 +62,11 @@ set_configs () {
 
         device="mlu"
         ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         cur_ecc_status=""
@@ -80,6 +83,13 @@ set_configs () {
             if [ $visible_cards -eq -1 ]; then
                 # echo "Please set env MLU_VISIBLE_DEVICES before running multicards."
                 exit 1
+            fi
+	    num_data_per_iter=$[ $batch_size * $visible_cards]
+            num_iters=$[ $num_data / $num_data_per_iter ]
+            if [[ $num_iters -lt $iters  ]]; then
+                iters=$num_iters
+                iters_count=$[ $num_iters / 3 ]
+                export MLU_ADAPTIVE_STRATEGY_COUNT=$iters_count
             fi
         fi
 

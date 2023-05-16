@@ -37,11 +37,16 @@ config=$1
 source ${CUR_DIR}/params_config.sh
 set_configs "$config"
 
+pushd $CUR_DIR/../
+pip install -r requirement.txt
+popd
+
 log_dir="${CUR_DIR}/../data/output/${net}_train_perf_log"
 ckp_dir="${CUR_DIR}/../data/output/${net}_train_perf_ckps"
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="ImageNet2012"
     run_cmd="python \
              $CUR_DIR/../classify_train.py \
              -a $net \
@@ -71,6 +76,11 @@ main() {
       run_cmd="${run_cmd} ${ddp_params}"
     fi
 
+    # use dali
+    if [[ ${cur_platform%_*} == "MLU590" && (${net} == "resnet50" || ${net} == "vgg16" || ${net} == "mobilenet_v2") ]]; then
+      run_cmd="${run_cmd} --data-backend dali-mlu"
+    fi
+
     # 配置混合精度相关参数
     if [[ ${precision} =~ ^O[0-3]{1}$ ]]; then
       run_cmd="${run_cmd} --cnmix --opt_level ${precision} "
@@ -94,6 +104,11 @@ main() {
     # 配置是否跑推理模式
     if [[ ${evaluate} == "True" ]]; then
         run_cmd="$run_cmd -e"
+    fi
+
+    # dummy_test
+    if [[ ${dummy_test} == "True" ]]; then
+        run_cmd="$run_cmd --dummy_test"
     fi
 
     # 参数配置完毕，运行脚本

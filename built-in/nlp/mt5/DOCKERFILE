@@ -1,0 +1,18 @@
+ARG FROM_IMAGE_NAME=yellow.hub.cambricon.com/pytorch/pytorch:v1.11.0-torch1.9-ubuntu18.04-py37
+
+FROM ${FROM_IMAGE_NAME}
+
+RUN mkdir /home/pytorch_modelzoo/
+
+COPY ./tools /home/pytorch_modelzoo/tools
+
+COPY ./built-in/nlp/mt5 /home/pytorch_modelzoo/built-in/nlp/mt5
+
+WORKDIR /home/pytorch_modelzoo/built-in/nlp/mt5/
+
+ENV VIRTUAL_ENV=/torch/venv3/pytorch
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip install -r requirements.txt
+RUN cp /home/pytorch_modelzoo/built-in/nlp/mt5/models/modeling_t5.py $(dirname $(python -c "import transformers; print(transformers.__file__)"))/models/t5/modeling_t5.py 

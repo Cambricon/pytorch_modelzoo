@@ -110,9 +110,9 @@ def class_count (data):
 def preprocess_train_config(args, config):
 
     if args.num_workers:
-        config["num_workers"] = args.num_workers
+        config["training_opt"]["num_workers"] = args.num_workers
     if args.batch_size:
-        config["batch_size"] = args.batch_size
+        config["training_opt"]["batch_size"] = args.batch_size
 
     return config
 

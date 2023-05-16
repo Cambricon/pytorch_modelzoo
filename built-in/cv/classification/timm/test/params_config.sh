@@ -29,14 +29,16 @@ inception_v3_base_params () {
     ddp="False"
 
     benchmark_mode="True"
-    max_batch_size_MLU370="104"
+    max_batch_size_MLU370="212"
     max_batch_size_MLU370_AMP="180"
-    max_batch_size_MLU590_M9="180"
-    max_batch_size_MLU590_H8="180"
-    max_batch_size_MLU590_M9_AMP="180"
-    max_batch_size_MLU590_H8_AMP="180"
-    max_batch_size_MLU370_ECC="104"
-    max_batch_size_A100="104"
+    max_batch_size_MLU590_M9="768"
+    max_batch_size_MLU590_M9U="768"
+    max_batch_size_MLU590_H8="664"
+    max_batch_size_MLU590_M9_AMP="1024"
+    max_batch_size_MLU590_M9U_AMP="1024"
+    max_batch_size_MLU590_H8_AMP="864"
+    max_batch_size_MLU370_ECC="180"
+    max_batch_size_A100="128"
 
     dataset=$IMAGENET_TRAIN_DATASET
     output="./output/inceptionv3_train"
@@ -71,14 +73,18 @@ inception_v4_base_params () {
     ddp="False"
 
     benchmark_mode="True"
-    max_batch_size_MLU370="104"
+    max_batch_size_MLU370="176"
     max_batch_size_MLU370_AMP="180"
-    max_batch_size_MLU590_M9="180"
-    max_batch_size_MLU590_H8="180"
-    max_batch_size_MLU590_M9_AMP="180"
-    max_batch_size_MLU590_H8_AMP="180"
+    max_batch_size_MLU590_M9="544"
+    max_batch_size_MLU590_M9U="544"
+    max_batch_size_MLU590_H8="460"
+    max_batch_size_MLU590_M9_AMP="1024"
+    max_batch_size_MLU590_M9U_AMP="1024"
+    max_batch_size_MLU590_H8_AMP="864"
+    max_batch_size_MLU580="224"
+    max_batch_size_MLU580_AMP="416"
     max_batch_size_MLU370_ECC="104"
-    max_batch_size_A100="104"
+    max_batch_size_A100="320"
 
     dataset=$IMAGENET_TRAIN_DATASET
     output="./output/inceptionv4_train"
@@ -126,7 +132,7 @@ set_configs () {
         perf_iters_rule iters
 
         ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""

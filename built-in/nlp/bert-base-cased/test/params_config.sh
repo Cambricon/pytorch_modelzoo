@@ -29,9 +29,13 @@ base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="16"
     max_batch_size_MLU370="32"
-    max_batch_size_MLU590="128"
+    max_batch_size_MLU590_M9="160"
+    max_batch_size_MLU590_M9U="160"
+    max_batch_size_MLU590_H8="96"
     max_batch_size_MLU370_AMP="32"
-    max_batch_size_MLU590_AMP="160"
+    max_batch_size_MLU590_M9_AMP="160"
+    max_batch_size_MLU590_M9U_AMP="160"
+    max_batch_size_MLU590_H8_AMP="96"
     max_batch_size_MLU370_ECC="32"
     max_batch_size_V100="16"
 
@@ -74,11 +78,11 @@ set_configs () {
         perf_iters_rule train_iters
 
         ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         get_ecc_status cur_ecc_status

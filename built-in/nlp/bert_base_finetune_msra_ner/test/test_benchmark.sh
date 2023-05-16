@@ -22,7 +22,11 @@ function usage () {
     echo "|      which means running bert_msra on 4 MLU cards with O1 precision."
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
-
+#check env
+if [ -z ${PYTORCH_TRAIN_CHECKPOINT} ]; then
+  echo "please set environment variable PYTORCH_TRAIN_CHECKPOINT."
+  exit 1
+fi
 # 获取用户指定config函数并执行,得到对应config的参数配置
 config_file=$OPTARG
 while getopts 'hc:' opt; do
@@ -62,6 +66,7 @@ fi
 main() {
 
     pushd $BERT_DIR
+    pip install -r requirements.txt
     # 配置DDP相关参数
     if [[ $ddp == "True" ]]; then
       use_launch="-m torch.distributed.launch --nproc_per_node=${nproc_per_node} --nnodes=1 --node_rank=0"
@@ -74,7 +79,7 @@ main() {
     fi
 
     run_cmd="python $use_launch ${train_script}  \
-      --bert_model_dir $IMAGENET_TRAIN_CHECKPOINT/bert-base-chinese-pytorch  \
+      --bert_model_dir $PYTORCH_TRAIN_CHECKPOINT/bert-base-chinese-pytorch  \
       --run_epochs $run_epochs  \
       --iters $iters  \
       --batch_size $batch_size  \

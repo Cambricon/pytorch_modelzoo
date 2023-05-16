@@ -12,6 +12,7 @@ function usage () {
     echo "|             precision: fp32"
     echo "|             device: mlu, gpu"
     echo "|             option1(multicards): ddp"
+    echo "|             option2(dummy test): dummy_test"
     echo "|                                                   "
     echo "|  eg.1. bash test_benchmark.sh fp32-mlu"
     echo "|      which means running crnn net on single MLU card with fp32 precision."
@@ -45,6 +46,7 @@ popd
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="Synth90k"
     run_cmd="python train.py \
 	     --adam \
              --lr $lr \
@@ -56,6 +58,9 @@ main() {
              --displayInterval $display_interval \
              --workers $num_workers \
              --cudnn_lstm"
+    if [[ ${dummy_test} == "True" ]]; then
+        run_cmd="$run_cmd --dummy_test"
+    fi
 
     # 配置设备相关参数
     if [[ $device == "mlu" ]]; then
@@ -66,9 +71,6 @@ main() {
 
     # 配置DDP相关参数
     if [[ $ddp == "True" && $visible_cards -ne -1 ]]; then
-	source ${CUR_DIR}/../../../../../tools/utils/common_utils.sh
-	get_visible_cards visible_cards
-	echo $visible_cards
         run_cmd="${run_cmd} --ddp True --ngpu $visible_cards"
     else
         run_cmd="${run_cmd} --ngpu 1"

@@ -4,19 +4,26 @@ CONFIG_DIR=$(cd $(dirname $0);pwd)
 
 ssd_vgg16_base_params () {
     device="mlu"
-    batch_size="64"
+    dist_backend="cncl"
+
+    batch_size="32"
+    iters="2"
+    eval_iters="2"
+    lr="1e-3"
     precision="fp32"
     ddp="False" 
+    card_num=1
+    distributed="--device_id 0"
     evaluate="False";
 
-    iters=2
-    eval_iters=50
     
-    benchmark_mode="False"
+    benchmark_mode="True"
     max_batch_size_MLU290="32"
-    max_batch_size_MLU370="32"
-    max_batch_size_MLU590="32"
-    max_batch_size_MLU370_ECC="32"
+    max_batch_size_MLU370="18"
+    max_batch_size_MLU590_M9="256"
+    max_batch_size_MLU590_M9U="256"
+    max_batch_size_MLU590_H8="256"
+    max_batch_size_MLU370_ECC="18"
     max_batch_size_V100="32"
 }
 
@@ -32,27 +39,26 @@ set_configs () {
         case "$var" in
             fp32)   ;;
             O[0-3]) precision=$var ;;
-            amp)    precision="pyamp" ;;
+            amp)    precision="amp" ;;
             mlu)    ;;
-            gpu)    device="GPU" ;;
-            ddp)    ddp="True" ;;
-            ci)     benchmark_mode=True;
-                    iters=2;
+            gpu)    device="GPU" ;
+		    dist_backend="nccl";;
+            ddp)    ddp="True" ;
+	    	    distributed="--multiprocessing-distributed";
+		    batch_size="16";
+		    lr="5e-4";;
+            ci)     benchmark_mode="False";
                     evaluate="True";
                     ;;
             *) echo "Unrecognized option: " $var; exit 1;;
         esac
     done
 
-    if [[ ${device} == "MLU" ]]; then
-        DEVICE_COUNT=`echo $MLU_VISIBLE_DEVICES | awk -F, '{print NF}'`
-    else
-        DEVICE_COUNT=`echo $CUDA_VISIBLE_DEVICES | awk -F, '{print NF}'`
-    fi
+
+    ## 加载公用方法
+    source ${CONFIG_DIR}/../../../../../tools/utils/common_utils.sh
     # 处理benchmark_mode所需的参数
     if [[ $benchmark_mode == "True" ]]; then
-        ## 加载公用方法
-        source ${CONFIG_DIR}/../../../../../tools/utils/common_utils.sh
 
         ## 获取benchmark_mode计数规则,配置迭代数
         iters=-1
@@ -60,7 +66,7 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         cur_ecc_status=""
@@ -70,32 +76,19 @@ set_configs () {
         fi
         batch_size=${!mbs_name}
 
-        if [[ ${DEVICE_COUNT} -eq 16 || ${DEVICE_COUNT} -eq 8  ]]; then
-            num_workers="7"
-        fi
-        nproc_per_node=${DEVICE_COUNT}
-        num_epochs=1
-
-        ## for bs=512, 获取benchmark_mode计数规则,配置迭代数
-        if [[ $cur_platform == "MLU370" && ${ddp} == "True" ]]; then
-            total_iters=100
-            cutdown_iters=50
-            if [[ ${DEVICE_COUNT} -le 4 ]]; then
-                total_iters=20
-                cutdown_iters=10
-            elif [[ ${DEVICE_COUNT} -le 8 ]]; then
-                total_iters=10
-                cutdown_iters=5
-            elif [[ ${DEVICE_COUNT} -le 16 ]]; then
-                total_iters=6
-                cutdown_iters=2
-            fi
-            iters=$total_iters
-            export MLU_ADAPTIVE_STRATEGY_COUNT=$cutdown_iters
-        fi
-
         ## 检查性能模式软硬件环境
         pushd ${CONFIG_DIR}/../../../../../tools/mlu_performance_check/; ./check_mlu_perf.sh; popd;
     fi
+
+    if [[ $ddp == "True" ]]; then
+	get_visible_cards card_num
+    fi
+
+    if [[ $card_num -le 0 ]]; then
+	echo "Invalid card number ${card_num}!!!"
+	exit 1
+    fi
+
+    batch_size=`expr ${card_num} \* ${batch_size}`
 }
 

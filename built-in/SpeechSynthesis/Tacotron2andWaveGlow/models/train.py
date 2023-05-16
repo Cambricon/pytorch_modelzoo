@@ -37,8 +37,6 @@ from contextlib import contextmanager
 
 import torch
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
-from torch.nn.parameter import Parameter
 
 import torch.distributed as dist
 import torch.multiprocessing as mp
@@ -54,11 +52,8 @@ from tacotron2_common.utils import ParseFromConfigFile
 import dllogger as DLLogger
 from dllogger import StdOutBackend, JSONStreamBackend, Verbosity
 
-from scipy.io.wavfile import write as write_wav
-
 import random
 import numpy as np
-import re
 
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(cur_dir + "/../../../../tools/utils/")
@@ -96,6 +91,8 @@ def parse_args(parser):
                           help='Number of total epochs to run')
     training.add_argument('--iter', type=int, required=False, default = -1,
                           help='Number of total epochs to run')
+    training.add_argument('--last-perf', type=int, required=False, default = 40,
+                          help='Number of last iters for benchmark')
     training.add_argument('--epochs-per-checkpoint', type=int, default=50,
                           help='Number of epochs per checkpoint')
     training.add_argument('--checkpoint-path', type=str, default='',
@@ -219,7 +216,7 @@ def init_mlu_distributed(args, world_size, rank, group_name):
 
     print("Done initializing distributed")
 
-def save_checkpoint(model, optimizer, epoch, config, amp_run, output_dir, model_name,
+def save_checkpoint(model, optimizer, epoch, config, output_dir, model_name,
                     local_rank, world_size, use_mlu, scaler):
 
     if use_mlu:
@@ -248,9 +245,8 @@ def save_checkpoint(model, optimizer, epoch, config, amp_run, output_dir, model_
                       'random_rng_states_all': random_rng_states_all,
                       'config': config,
                       'state_dict': model.state_dict(),
-                      'optimizer': optimizer.state_dict()}
-        if amp_run:
-            checkpoint['amp'] = scaler.state_dict()
+                      'optimizer': optimizer.state_dict(),
+                      'scaler': scaler.state_dict()}
 
         checkpoint_filename = "checkpoint_{}_{}.pt".format(model_name, epoch)
         checkpoint_path = os.path.join(output_dir, checkpoint_filename)
@@ -276,7 +272,7 @@ def get_last_checkpoint_filename(output_dir, model_name):
         print("No last checkpoint available - starting from epoch 0 ")
         return ""
 
-def load_checkpoint(model, optimizer, epoch, config, args, local_rank, scaler):
+def load_checkpoint(model, optimizer, epoch, args, local_rank, scaler):
     
     checkpoint = torch.load(args.checkpoint_path, map_location='cpu')
 
@@ -300,7 +296,7 @@ def load_checkpoint(model, optimizer, epoch, config, args, local_rank, scaler):
         torch.random.set_rng_state(checkpoint['random_rng_state'])
     else:
         raise Exception("Model checkpoint must have either 'random_rng_state' or 'random_rng_states_all' key.")
-    config = checkpoint['config']
+
     resume_point_replace = {}
     if args.resume_multi_device: # DDP module create by multi device
         # Remove "submodule" (e.g model.submodule.conv1 -> model.conv1)
@@ -317,9 +313,8 @@ def load_checkpoint(model, optimizer, epoch, config, args, local_rank, scaler):
         resume_point_replace = checkpoint['state_dict']
     model.load_state_dict(resume_point_replace, strict=True if args.use_mlu is False else False)
     optimizer.load_state_dict(checkpoint['optimizer'])
-
-    if args.pyamp:
-        scaler.load_state_dict(checkpoint['amp'])
+    scaler.load_state_dict(checkpoint['scaler'])
+    return checkpoint['config']
 
 
 # adapted from: https://discuss.pytorch.org/t/opinion-eval-should-be-a-context-manager/18998/3
@@ -338,7 +333,7 @@ def evaluating(model):
 
 
 def validate(model, criterion, valset, epoch, batch_iter, batch_size,
-             world_size, collate_fn, distributed_run, rank, batch_to_device):
+             world_size, collate_fn, distributed_run, rank, batch_to_device, amp_run):
     """Handles all the validation scoring and printing"""
     with evaluating(model), torch.no_grad():
         val_sampler = DistributedSampler(valset) if distributed_run else None
@@ -355,8 +350,10 @@ def validate(model, criterion, valset, epoch, batch_iter, batch_size,
             iter_start_time = time.perf_counter()
 
             x, y, num_items = batch_to_device(batch)
-            y_pred = model(x)
-            loss = criterion(y_pred, y)
+            #AMP upstream autocast
+            with torch.cuda.amp.autocast(enabled=amp_run):
+                y_pred = model(x)
+                loss = criterion(y_pred, y)
             if distributed_run:
                 reduced_val_loss = reduce_tensor(loss.data, world_size).item()
                 reduced_num_items = reduce_tensor(num_items.data, 1).item()
@@ -486,9 +483,8 @@ def main():
     if args.resume_from_last:
         args.checkpoint_path = get_last_checkpoint_filename(args.output, model_name)
 
-    if args.checkpoint_path is not "":
-        load_checkpoint(model, optimizer, start_epoch, model_config,
-                        args, local_rank , scaler)
+    if args.checkpoint_path != "":
+        model_config = load_checkpoint(model, optimizer, start_epoch, args, local_rank , scaler)
 
     start_epoch = start_epoch[0]
 
@@ -523,6 +519,7 @@ def main():
     iteration = 0
     train_epoch_items_per_sec = 0.0
     val_loss = 0.0
+    last_perf = 0.0
     num_iters = 0
 
     model.train()
@@ -530,19 +527,10 @@ def main():
 
     batch_loss = []
     benchmark_train_items = []
-
-    ## BENCHMARK_LOG and AVG_LOG test
-    enable_only_benchmark = True if "BENCHMARK_LOG" in os.environ else False
-    enable_only_avglog = True if "AVG_LOG" in os.environ else False
-    metric_collector = MetricCollector(enable_only_benchmark=enable_only_benchmark,
-                                       enable_only_avglog=enable_only_avglog,
-                                       record_elapsed_time=True,
-                                       record_hardware_time=True if args.use_mlu else False)
     
-    # metric_collector = MetricCollector(
-
-    #     record_elapsed_time=True,
-    #     record_hardware_time=True if args.use_mlu else False)
+    metric_collector = MetricCollector(
+        record_elapsed_time=True,
+        record_hardware_time=True if args.use_mlu else False)
 
     for epoch in range(start_epoch, args.epochs):
         torch.cuda.synchronize()
@@ -550,9 +538,6 @@ def main():
         # used to calculate avg items/sec over epoch
         reduced_num_items_epoch = 0
 
-        train_epoch_items_per_sec = 0.0
-
-        num_iters = 0
         reduced_loss = 0
 
         # if overflow at the last iteration then do not save checkpoint
@@ -608,18 +593,16 @@ def main():
             if args.pyamp:
                 scaler.scale(loss).backward()
                 scaler.unscale_(optimizer)
-                grad_norm = torch.nn.utils.clip_grad_norm_(
-                    model.parameters(), args.grad_clip_thresh)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip_thresh)
                 scaler.step(optimizer)
                 scaler.update()
             else:
                 loss.backward()
-                grad_norm = torch.nn.utils.clip_grad_norm_(
-                    model.parameters(), args.grad_clip_thresh)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip_thresh)
                 optimizer.step()
 
             model.zero_grad()
-            
+
             torch.cuda.synchronize()
 
             metric_collector.record()
@@ -632,7 +615,8 @@ def main():
 
             DLLogger.log(step=(epoch, i), data={'train_items_per_sec': items_per_sec})
             DLLogger.log(step=(epoch, i), data={'train_iter_time': iter_time})
-
+            if iteration >= (args.epochs * len(train_loader) - args.last_perf):
+                last_perf += items_per_sec
             benchmark_train_items.append(iter_time)
             iteration += 1
 
@@ -650,11 +634,11 @@ def main():
                                                iteration, args.batch_size,
                                                world_size, collate_fn,
                                                distributed_run, local_rank,
-                                               batch_to_device)
+                                               batch_to_device, args.pyamp)
 
         if (epoch % args.epochs_per_checkpoint == 0) and args.bench_class == "":
             save_checkpoint(model, optimizer, epoch, model_config,
-                            args.pyamp, args.output, args.model_name,
+                            args.output, args.model_name,
                             local_rank, world_size, args.use_mlu, scaler)
         if local_rank == 0:
             DLLogger.flush()
@@ -664,7 +648,7 @@ def main():
     torch.cuda.synchronize()
 
     device_count = ct.device_count() if args.use_mlu else torch.cuda.device_count()
-    train_items_per_sec = (train_epoch_items_per_sec/num_iters if num_iters > 0 else 0.0)
+    train_items_per_sec = train_epoch_items_per_sec/num_iters if num_iters > 0 else 0.0
 
     metric_collector.insert_metrics(
         net = args.model_name,
@@ -683,7 +667,7 @@ def main():
     DLLogger.log(step=tuple(), data={'val_loss': val_loss})
     DLLogger.log(step=tuple(), data={'train_items_per_sec': train_items_per_sec})
     DLLogger.log(step=tuple(), data={'val_items_per_sec': val_items_per_sec})
-
+    DLLogger.log(step=tuple(), data={'last_40_iters_perf': last_perf/args.last_perf})
     if local_rank == 0:
         DLLogger.flush()
 

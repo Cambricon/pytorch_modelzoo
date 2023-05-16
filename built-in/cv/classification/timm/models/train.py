@@ -317,6 +317,28 @@ parser.add_argument('--hvd', type=int, default=-1,
                         help='how manys cards if using horovod')
 parser.add_argument('--iters', type=int, default=-1, metavar='N',
                         help='iters per epoch')
+parser.add_argument('--dummy_test', dest='dummy_test', action='store_true',
+                        help='use fake data to traing')
+
+
+class dummy_data_loader():
+    def __init__(self, len = 0, images_size = (3, 224, 224), batch_size = 1, num_classes = 1000):
+        self.len = len
+        images = torch.normal(mean = -0.03 , std = 1.24, size = (batch_size,)+images_size)
+        target = torch.randint(low = 0, high = num_classes, size = (batch_size,))
+        self.images = images.to(ct.mlu_device(), non_blocking=True)
+        self.target = target.to(ct.mlu_device(), non_blocking=True)
+        self.data = 0
+    def __iter__(self):
+        return self
+    def __len__(self):
+        return self.len
+    def __next__(self):
+        if self.data > self.len:
+            raise StopIteration
+        else:
+            self.data += 1
+            return self.images, self.target
 
 def _parse_args():
     # Do we have a config file to parse?
@@ -657,7 +679,7 @@ def main():
             train_metrics = train_one_epoch(
                 epoch, model, loader_train, optimizer, train_loss_fn, args,
                 lr_scheduler=lr_scheduler, saver=saver, output_dir=output_dir,
-                amp_autocast=amp_autocast, loss_scaler=loss_scaler, model_ema=model_ema, mixup_fn=mixup_fn)
+                amp_autocast=amp_autocast, loss_scaler=loss_scaler, model_ema=model_ema, mixup_fn=mixup_fn, input_size=data_config['input_size'])
 
             if args.distributed and args.dist_bn in ('broadcast', 'reduce'):
                 if args.local_rank == 0:
@@ -696,7 +718,7 @@ def main():
 def train_one_epoch(
         epoch, model, loader, optimizer, loss_fn, args,
         lr_scheduler=None, saver=None, output_dir=None, amp_autocast=suppress,
-        loss_scaler=None, model_ema=None, mixup_fn=None):
+        loss_scaler=None, model_ema=None, mixup_fn=None, input_size=None):
 
     if args.mixup_off_epoch and epoch >= args.mixup_off_epoch:
         if args.prefetcher and loader.mixup_enabled:
@@ -714,6 +736,9 @@ def train_one_epoch(
     end = time.time()
     last_idx = len(loader) - 1
     num_updates = epoch * len(loader)
+    if args.dummy_test:
+        loader = dummy_data_loader(len = len(loader), images_size = input_size,
+                                  batch_size = args.batch_size)
     # for benchmark test
     metric_collector = MetricCollector(
         enable_only_benchmark=True,

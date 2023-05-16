@@ -3,7 +3,7 @@ set -e
 
 CUR_DIR=$(cd $(dirname $0);pwd)
 
-export DATASETS_NAME="Synth90k"
+export DATASET_NAME="Synth90k"
 pushd $CUR_DIR/../
 source env.sh
 popd

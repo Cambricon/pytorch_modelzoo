@@ -30,9 +30,10 @@ parser.add_argument('--restore_file', default='best', help="name of the file in 
 parser.add_argument('--multi_device', default=False, action='store_true', help="Whether to use multiple GPUs if available")
 parser.add_argument('--fp16', default=False, action='store_true', help="Whether to use 16-bit float precision instead of 32-bit")
 parser.add_argument('--device', default='cpu', type=str, help='Use cpu gpu or mlu device')
+parser.add_argument('--pyamp', action='store_true', default=False, help='use pytorch amp for mixed precision training')
 
 
-def evaluate(model, data_iterator, params, mark='Eval', verbose=False):
+def evaluate(model, data_iterator, params, args, mark='Eval', verbose=False):
     """Evaluate the model on `steps` batches."""
     # set model to evaluation mode
     model.eval()
@@ -84,6 +85,9 @@ def evaluate(model, data_iterator, params, mark='Eval', verbose=False):
 
 if __name__ == '__main__':
     args = parser.parse_args()
+    scaler = None
+    if args.pyamp:
+        scaler = GradScaler()
 
     # Load the parameters from json file
     json_path = os.path.join(args.model_dir, 'params.json')
@@ -131,7 +135,7 @@ if __name__ == '__main__':
 
     model.to(params.device)
     # Reload weights from the saved file
-    utils.load_checkpoint(os.path.join(args.model_dir, args.restore_file + '.pth.tar'), model)
+    utils.load_checkpoint(os.path.join(args.model_dir, args.restore_file + '.pth.tar'), scaler, model)
     if args.fp16:
         model.half()
     if params.n_device > 1 and args.multi_device:

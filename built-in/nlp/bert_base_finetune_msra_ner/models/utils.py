@@ -108,7 +108,7 @@ def save_checkpoint(state, is_best, checkpoint):
     if is_best:
         shutil.copyfile(filepath, os.path.join(checkpoint, 'best.pth.tar'))
 
-def load_checkpoint(checkpoint, model, optimizer=None):
+def load_checkpoint(checkpoint, model, scaler, optimizer=None):
     """Loads model parameters (state_dict) from file_path. If optimizer is provided, loads state_dict of
     optimizer assuming it is present in checkpoint.
 
@@ -124,6 +124,8 @@ def load_checkpoint(checkpoint, model, optimizer=None):
     model.load_state_dict(checkpoint['state_dict'], strict=False)
     if 'cnmix' in checkpoint:
         cnmix.load_state_dict(checkpoint['cnmix'])
+    if isinstance(checkpoint, dict) and 'amp' in checkpoint:
+                scaler.load_state_dict(checkpoint['amp'])
 
     if optimizer:
         optimizer.load_state_dict(checkpoint['optim_dict'], strict=False)

@@ -1,7 +1,0 @@
-classes= 80
-train=data/trainvalno5k.txt
-valid=data/file_list_for_release
-names=coco.names
-backup=backup/
-eval=coco
-

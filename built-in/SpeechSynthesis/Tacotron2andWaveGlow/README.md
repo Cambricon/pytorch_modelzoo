@@ -71,6 +71,7 @@ https://github.com/NVIDIA/waveglow
 ### **数据集准备**
 1.下载数据集https://keithito.com/LJ-Speech-Dataset/ ,并解压，包含的内容如下：
 目录结构：
+```
 ├── mels
 │   ├── LJ001-0001.pt
 │   ├── LJ001-0002.pt
@@ -81,7 +82,7 @@ https://github.com/NVIDIA/waveglow
 │   ├── ...
 ├── metadata.csv
 ├── README
-
+```
 
 ### 环境准备
 #### 基于base docker image安装

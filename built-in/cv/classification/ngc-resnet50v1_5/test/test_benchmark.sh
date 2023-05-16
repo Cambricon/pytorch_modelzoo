@@ -65,7 +65,7 @@ run_cmd="$IMAGENET_TRAIN_DATASET  \
 
 # config配置到网络脚本的转换
 main() {
-
+    export DATASET_NAME="ImageNet-2012"
     pushd $RES_DIR
 
     # 配置DDP相关参数

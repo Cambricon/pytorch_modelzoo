@@ -61,7 +61,7 @@ def move_files(file_groups):
 
             # Check if we have already moved this file, or at least that it
             # exists to move.
-            filename_all = '/workspace/UCF101/videos/' + classname +'/' + filename
+            filename_all = 'avi/' + filename
             if not os.path.exists(filename_all):
                 print("Can't find %s to move. Skipping." % (filename_all))
                 continue

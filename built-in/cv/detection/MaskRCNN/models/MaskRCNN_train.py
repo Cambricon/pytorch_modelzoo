@@ -206,8 +206,6 @@ def main():
     if args.seed is  None:
         args.seed = np.random.randint(1e4)
         
-    if args.distributed:
-        args.seed = (args.seed + torch.distributed.get_rank()) % 2**32
     print("Using seed = {}".format(args.seed))
     random.seed(args.seed)
     np.random.seed(args.seed)

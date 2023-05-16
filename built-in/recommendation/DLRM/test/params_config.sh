@@ -67,7 +67,7 @@ set_configs () {
 
         device=$device
         ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
 
         ## 获取平台类型，配置最大batch_size
         # cur_platform=""

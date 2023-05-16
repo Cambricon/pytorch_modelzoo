@@ -10,15 +10,15 @@ function usage () {
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
     echo "|  bash $0 [-c] [config_file] net-precision-device-[options...]"
     echo "|      Supported options:"
-    echo "|             precision: fp32, O0, O1, O2, O3, amp"
+    echo "|             precision: fp32, amp"
     echo "|             device: mlu, gpu"
     echo "|             option1(multicards): ddp"
     echo "|                                                   "
-    echo "|  eg.1. bash test_benchmark.sh -c fp32-mlu"
+    echo "|  eg.1. bash test_benchmark.sh fp32-mlu"
     echo "|      which means running OLTR on single MLU card with fp32 precision."
     echo "|                                                   "
-    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh -c O1-mlu-ddp"
-    echo "|      which means running OLTR net on 4 MLU cards with O1 precision."
+    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh fp32-mlu-ddp"
+    echo "|      which means running OLTR net on 4 MLU cards with fp32 precision."
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
 
@@ -31,6 +31,12 @@ while getopts 'hc:' opt; do
        ?)  echo "unrecognized optional arg : "; $opt; usage; exit 1;;
    esac
 done
+
+if [ -z $IMAGENET_TRAIN_CHECKPOINT ]; then
+    echo "[ERROR] Please set IMAGENET_TRAIN_CHECKPOINT."
+    exit 1
+fi
+
 ## 加载参数配置
 config=$1
 if [[ $config_file != "" ]]; then
@@ -66,8 +72,9 @@ train_script="python main_imagenet.py --device $runnable_cards"
 
 # config配置到网络脚本的转换
 main() {
-
+    export DATASET_NAME="ImageNet-LT"
     pushd $OLTR_DIR
+    pip install -r requirements.txt
     train_cmd="${train_script} --data_path $IMAGENET_TRAIN_DATASET --config imagenet_mid_stage_2_meta_embedding.py --iters ${iters} --seed 1 --num_workers ${num_workers} --batch_size ${batch_size}"
     run_cmd="${train_script} --data_path $IMAGENET_TRAIN_DATASET --config imagenet_mid_stage_2_meta_embedding.py --iters ${iters} --test_open --seed 1"
 

@@ -198,7 +198,7 @@ def train_and_evaluate(model, train_data, val_data, optimizer, scheduler, params
         params.eval_steps = params.train_steps
         #train_metrics = evaluate(model, train_data_iterator, params, args, mark='Train')
         params.eval_steps = params.val_steps
-        val_metrics = evaluate(model, val_data_iterator, params, mark='Val')
+        val_metrics = evaluate(model, val_data_iterator, params, args, mark='Val')
 
         val_f1 = val_metrics['f1']
         improve_f1 = val_f1 - best_val_f1

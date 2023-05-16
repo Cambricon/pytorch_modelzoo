@@ -28,7 +28,9 @@ base_params () {
 
     max_batch_size_MLU290="2"
     max_batch_size_MLU370="2"
-    max_batch_size_MLU590="2"
+    max_batch_size_MLU590_M9="8"
+    max_batch_size_MLU590_M9U="8"
+    max_batch_size_MLU590_H8="8"
     max_batch_size_MLU370_ECC="2"
     max_batch_size_V100="2"
 }
@@ -67,14 +69,14 @@ set_configs () {
     # 处理benchmark_mode所需的参数
     if [[ $benchmark_mode == "True" ]]; then
         ## 加载公用方法
-        source ${CONFIG_DIR}/../../../../tools/utils/common_utils.sh
+        source ${CONFIG_DIR}/../../../../../tools/utils/common_utils.sh
 
         ## 获取benchmark_mode计数规则,配置迭代数
         perf_iters_rule train_steps
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         cur_ecc_status=""
@@ -109,7 +111,7 @@ set_configs () {
         fi
 
         ## 检查性能模式软硬件环境
-        pushd ${CONFIG_DIR}/../../../../tools/mlu_performance_check/; ./check_mlu_perf.sh; popd;
+        pushd ${CONFIG_DIR}/../../../../../tools/mlu_performance_check/; ./check_mlu_perf.sh; popd;
     fi
 }
 

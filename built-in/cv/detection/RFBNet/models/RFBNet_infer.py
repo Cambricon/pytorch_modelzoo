@@ -14,8 +14,9 @@ import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 import numpy as np
 from torch.autograd import Variable
-from data import VOCroot, VOCDetectionResult
-from data import AnnotationTransform, VOCDetection, BaseTransform, VOC_300,VOC_512
+from data import VOCroot,COCOroot, VOCDetectionResult
+from data import AnnotationTransform, COCODetection, VOCDetection, BaseTransform, VOC_300,VOC_512,COCO_300,COCO_512, COCO_mobile_300
+
 
 import torch.utils.data as data
 from layers.functions import Detect,PriorBox
@@ -88,6 +89,14 @@ class TestSetWrapper:
             self.cfg = (VOC_300, VOC_512)[args.size == '512']
             self.testset = VOCDetection(VOCroot, VOCDetectionResult, [('2007', 'test')], None, AnnotationTransform())
             self.num_images = len(self.testset)
+        elif dataset_type == 'COCO':
+            self.cfg = (COCO_300, COCO_512)[args.size == '512']
+            self.testset = COCODetection(COCOroot, [('2014', 'minival')], None)
+            self.num_images = len(self.testset)
+        elif dataset_type == 'RFB_mobile':
+            self.cfg = COCO_mobile_300
+            self.testset = None
+            print('Only VOC and COCO are supported now!')
         else:
             self.testset = None
             print('Only VOC and COCO are supported now!')

@@ -18,7 +18,9 @@ transformer_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="32"
     max_batch_size_MLU370="512"
-    max_batch_size_MLU590="512"
+    max_batch_size_MLU590_M9="1280"
+    max_batch_size_MLU590_M9U="1280"
+    max_batch_size_MLU590_H8="1280"
     max_batch_size_MLU370_ECC="512"
     max_batch_size_V100="512"
 
@@ -36,7 +38,7 @@ set_configs () {
         case "$var" in
             fp32)   ;;
             O[0-3]) precision=$var ;;
-            amp)    precision="pyamp" ;;
+            amp)    precision="amp" ;;
             mlu)    ;;
             gpu)    device="GPU" ;;
             ddp)    ddp="True" ;;
@@ -65,7 +67,7 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         cur_ecc_status=""

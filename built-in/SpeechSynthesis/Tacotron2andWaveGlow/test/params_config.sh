@@ -2,7 +2,7 @@
 
 CONFIG_DIR=$(cd $(dirname $0);pwd)
 
-Tacotron2_base_params () {
+tacotron2_base_params () {
     net="Tacotron2"
 
     use_mlu="True"
@@ -27,14 +27,20 @@ Tacotron2_base_params () {
 
     # max_batch_size_MLU290="128"
     max_batch_size_MLU370="48"
-    max_batch_size_MLU590="48"
-    max_batch_size_MLU370_ECC="48"
+    max_batch_size_MLU370_ECC="64"
+    max_batch_size_MLU370_ECC_AMP="112"
+    max_batch_size_MLU590_M9="288"
+    max_batch_size_MLU590_M9U="288"
+    max_batch_size_MLU590_H8="256"
+    max_batch_size_MLU590_M9_AMP="288"
+    max_batch_size_MLU590_M9U_AMP="288"
+    max_batch_size_MLU590_H8_AMP="256"
     max_batch_size_V100="48"
 
     #resume="${PYTORCH_TRAIN_CHECKPOINT}/TTS/checkpoint_Tacotron2_1500.pt"
 }
 
-WaveGlow_base_params () {
+waveglow_base_params () {
     net="WaveGlow"
 
     use_mlu="True"
@@ -60,6 +66,7 @@ WaveGlow_base_params () {
     max_batch_size_MLU370="4"
     max_batch_size_MLU590="4"
     max_batch_size_MLU370_ECC="4"
+    max_batch_size_MLU370_ECC_AMP="4"
     max_batch_size_V100="4"
 
     #resume="${PYTORCH_TRAIN_CHECKPOINT}/TTS/checkpoint_WaveGlow_1000.pt"
@@ -118,13 +125,19 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
+        if [[ ${precision} == "pyamp" ]]; then
+            mbs_name=max_batch_size_${cur_platform}_AMP
+        fi
 
         cur_ecc_status=""
         get_ecc_status cur_ecc_status
         if [[ ${cur_ecc_status} == "ON" ]]; then
             mbs_name=max_batch_size_${cur_platform}_ECC
+            if [[ ${precision} == "pyamp" ]]; then
+                mbs_name=max_batch_size_${cur_platform}_ECC_AMP
+            fi
         fi
         batch_size=${!mbs_name}
 

@@ -14,10 +14,15 @@ wavernn_base_params () {
     ddp="False"
     benchmark_mode="True"
     num_per_checkpoint="10"
-#    max_batch_size_MLU290="32"
-#    max_batch_size_MLU370="32"
-#    max_batch_size_MLU590="32"
-#    max_batch_size_V100="32"
+    max_batch_size_MLU290="32"
+    max_batch_size_MLU370="32"
+    max_batch_size_MLU590_M9="1440"
+    max_batch_size_MLU590_M9U="1440"
+    max_batch_size_MLU590_H8="1024"
+    max_batch_size_MLU590_M9_AMP="1440"
+    max_batch_size_MLU590_M9U_AMP="1440"
+    max_batch_size_MLU590_H8_AMP="1024"
+    max_batch_size_V100="32"
 
     resume="False"
 }
@@ -26,9 +31,7 @@ set_configs () {
     wavernn_base_params
 
     # 根据每个字段的功能, overide对应参数
-    args=$1
-    net=${args%%-*}
-    params=${args#*-}
+    params=$1
     params_array=(${params//-/ })
     for var in ${params_array[@]}
     do
@@ -57,7 +60,7 @@ set_configs () {
         perf_iters_rule iters
 
         ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
 
         ## 获取平台类型，配置最大batch_size
         #cur_platform=""

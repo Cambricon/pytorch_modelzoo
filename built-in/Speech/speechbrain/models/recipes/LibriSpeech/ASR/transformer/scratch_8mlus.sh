@@ -1,0 +1,1 @@
+python -m torch.distributed.run --nproc_per_node=8 train.py hparams/conformer_small.yaml --device mlu --distributed_launch --distributed_backend cncl --data_folder ${PYTORCH_TRAIN_DATASET}/LibriSpeech

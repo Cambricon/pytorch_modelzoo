@@ -21,6 +21,10 @@ function usage () {
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
 
+if [ -z ${PYTORCH_TRAIN_DATASET} ]; then
+  echo "please set environment variable PYTORCH_TRAIN_DATASET."
+  exit 1
+fi
 
 # 获取用户指定config函数并执行,得到对应config的参数配置
 config_file=""
@@ -69,6 +73,7 @@ main() {
 
 
 pushd ${CUR_DIR}/../models
+pip install -r requirements.txt
 if [ -d ${DATASET_DIR} ]
 then
     # start timing
@@ -88,7 +93,6 @@ mllog_event(key=constants.CACHE_CLEAR, value=True)"
     echo "BENCHMARK_LOG is "$BENCHMARK_LOG
     echo "AVG_LOG is "$AVG_LOG
 
-    usage
     main
     
     # end timing

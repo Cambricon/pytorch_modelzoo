@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGENET_TRAIN_CHECKPOINT=/data/pytorch/models/pytorch_weight/checkpoints/
+#IMAGENET_TRAIN_CHECKPOINT=/data/pytorch/models/pytorch_weight/checkpoints/
 
 CONFIG_DIR=$(cd $(dirname $0);pwd)
 
@@ -21,7 +21,9 @@ resnet50_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="256"
     max_batch_size_MLU370="256"
-    max_batch_size_MLU590="256"
+    max_batch_size_MLU590_M9="792"
+    max_batch_size_MLU590_M9U="792"
+    max_batch_size_MLU590_H8="696"
     max_batch_size_MLU370_ECC="224"
     max_batch_size_V100="128"
 
@@ -45,7 +47,9 @@ resnet18_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="512"
     max_batch_size_MLU370="664"
-    max_batch_size_MLU590="664"
+    max_batch_size_MLU590_M9="2048"
+    max_batch_size_MLU590_M9U="2048"
+    max_batch_size_MLU590_H8="2560"
     max_batch_size_MLU370_ECC="664"
     max_batch_size_V100="512"
 
@@ -69,7 +73,9 @@ vgg16_base_params(){
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="128"
-    max_batch_size_MLU590="128"
+    max_batch_size_MLU590_M9="664"
+    max_batch_size_MLU590_M9U="664"
+    max_batch_size_MLU590_H8="664"
     max_batch_size_MLU370_ECC="128"
     max_batch_size_V100="128"
 
@@ -93,7 +99,9 @@ vgg19_base_params(){
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="64"
-    max_batch_size_MLU590="64"
+    max_batch_size_MLU590_M9="664"
+    max_batch_size_MLU590_M9U="664"
+    max_batch_size_MLU590_H8="664"
     max_batch_size_MLU370_ECC="64"
     max_batch_size_V100="64"
 
@@ -117,7 +125,9 @@ vgg16_bn_base_params(){
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="128"
-    max_batch_size_MLU590="128"
+    max_batch_size_MLU590_M9="664"
+    max_batch_size_MLU590_M9U="664"
+    max_batch_size_MLU590_H8="504"
     max_batch_size_MLU370_ECC="128"
     max_batch_size_V100="128"
 
@@ -141,7 +151,9 @@ mobilenet_v2_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="256"
     max_batch_size_MLU370="256"
-    max_batch_size_MLU590="256"
+    max_batch_size_MLU590_M9="1280"
+    max_batch_size_MLU590_M9U="1280"
+    max_batch_size_MLU590_H8="1024"
     max_batch_size_MLU370_ECC="256"
     max_batch_size_V100="128"
 
@@ -165,7 +177,9 @@ alexnet_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="256"
     max_batch_size_MLU370="512"
-    max_batch_size_MLU590="512"
+    max_batch_size_MLU590_M9="1024"
+    max_batch_size_MLU590_M9U="1024"
+    max_batch_size_MLU590_H8="1024"
     max_batch_size_MLU370_ECC="512"
     max_batch_size_V100="256"
 
@@ -189,7 +203,9 @@ resnet101_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="168"
-    max_batch_size_MLU590="168"
+    max_batch_size_MLU590_M9="664"
+    max_batch_size_MLU590_M9U="664"
+    max_batch_size_MLU590_H8="504"
     max_batch_size_MLU370_ECC="136"
     max_batch_size_V100="128"
 
@@ -214,7 +230,9 @@ shufflenet_v2_x0_5_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="1024"
-    max_batch_size_MLU590="1024"
+    max_batch_size_MLU590_M9="1280"
+    max_batch_size_MLU590_M9U="1280"
+    max_batch_size_MLU590_H8="2560"
     max_batch_size_MLU370_ECC="784"
     max_batch_size_V100="1024"
 
@@ -239,7 +257,9 @@ shufflenet_v2_x1_0_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="976"
-    max_batch_size_MLU590="976"
+    max_batch_size_MLU590_M9="1280"
+    max_batch_size_MLU590_M9U="1280"
+    max_batch_size_MLU590_H8="2560"
     max_batch_size_MLU370_ECC="784"
     max_batch_size_V100="512"
 
@@ -264,7 +284,9 @@ shufflenet_v2_x1_5_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="512"
-    max_batch_size_MLU590="512"
+    max_batch_size_MLU590_M9="1024"
+    max_batch_size_MLU590_M9U="1024"
+    max_batch_size_MLU590_H8="2048"
     max_batch_size_MLU370_ECC="512"
     max_batch_size_V100="256"
 
@@ -288,7 +310,9 @@ googlenet_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="128"
     max_batch_size_MLU370="256"
-    max_batch_size_MLU590="256"
+    max_batch_size_MLU590_M9="1560"
+    max_batch_size_MLU590_M9U="1560"
+    max_batch_size_MLU590_H8="1024"
     max_batch_size_MLU370_ECC="256"
     max_batch_size_V100="128"
 
@@ -325,6 +349,7 @@ set_configs () {
                        resume_multi_device="True";
                        evaluate="True";
                        ;;
+	    dummy_test) dummy_test="True" ;;
             *) echo "Unrecognized option: " $var; exit 1;;
         esac
     done
@@ -340,7 +365,7 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         cur_ecc_status=""

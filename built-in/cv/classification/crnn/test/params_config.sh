@@ -17,7 +17,9 @@ crnn_base_params () {
     display_interval=1
     max_batch_size_MLU290="16"
     max_batch_size_MLU370="96"
-    max_batch_size_MLU590="96"
+    max_batch_size_MLU590_M9="2048"
+    max_batch_size_MLU590_M9U="2048"
+    max_batch_size_MLU590_H8="1280"
     max_batch_size_MLU370_ECC="96"
     max_batch_size_V100="16"
 
@@ -49,16 +51,11 @@ set_configs () {
                        iters=2;
                        evaluate="True";
                        ;;
+            dummy_test) dummy_test="True" ;;
             *) echo "Unrecognized option: " $var; exit 1;;
         esac
     done
     
-    if [[ ${device} == "MLU" ]]; then
-        DEVICE_COUNT=`echo $MLU_VISIBLE_DEVICES | awk -F, '{print NF}'`
-    else
-        DEVICE_COUNT=`echo $CUDA_VISIBLE_DEVICES | awk -F, '{print NF}'`
-    fi
-
     # 处理benchmark_mode所需的参数
     if [[ $benchmark_mode == "True" ]]; then
         ## 加载公用方法
@@ -71,7 +68,7 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         cur_ecc_status=""
@@ -81,11 +78,6 @@ set_configs () {
         fi
         batch_size=${!mbs_name}
 
-        if [[ ${DEVICE_COUNT} -eq 16 || ${DEVICE_COUNT} -eq 8  ]]; then
-            num_workers="7"
-        fi
-
-        nproc_per_node=${DEVICE_COUNT}
         num_epochs=1
         resume=""
         visible_cards=-1

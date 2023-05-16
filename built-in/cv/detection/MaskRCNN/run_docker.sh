@@ -29,6 +29,8 @@ docker run  -e DISPLAY=unix$DISPLAY --net=host --pid=host --ipc=host \
             -v $PYTORCH_TRAIN_CHECKPOINT:$PYTORCH_TRAIN_CHECKPOINT \
             -e COCO2014_TRAIN_DATASET=$COCO2014_TRAIN_DATASET \
             -e PYTORCH_TRAIN_CHECKPOINT=$PYTORCH_TRAIN_CHECKPOINT \
+            -v $PWD/../../../..:/home/pytorch_modelzoo  \
+            -w /home/pytorch_modelzoo/built-in/cv/detection/MaskRCNN/ \
             $IMAGE_NAME /bin/bash
 else
 docker start $CONTAINER_NAME

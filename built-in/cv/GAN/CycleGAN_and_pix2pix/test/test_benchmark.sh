@@ -39,17 +39,18 @@ set_configs "$config"
 
 # config配置到网络脚本的转换
 main() {
-
+    export DATASET_NAME="facades"
     pushd $PIX2PIX_DIR
+    pip install -r requirements.txt
 
     trained_cmd="train.py --name facades_pix2pix_resnet_9blocks --model pix2pix --netG resnet_9blocks \
                 --direction BtoA --lambda_L1 100 --dataset_mode aligned --norm batch --pool_size 0 --display_id 0 --seed 0 \
-                --dataroot $FACADES_PATH --batch_size $batch_size --num_threads $num_workers \
+                --dataroot $PYTORCH_TRAIN_DATASET/facades --batch_size $batch_size --num_threads $num_workers \
                 --iters $iters --device $device "
 
     test_cmd="test.py --name facades_pix2pix_resnet_9blocks --model pix2pix --netG resnet_9blocks \
               --direction BtoA --dataset_mode aligned --norm batch --eval \
-              --dataroot $FACADES_PATH --device $device "
+              --dataroot $PYTORCH_TRAIN_DATASET/facades --device $device "
 
     # 配置DDP相关参数
     if [[ $ddp == "True"  ]]; then

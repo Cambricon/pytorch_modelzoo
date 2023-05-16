@@ -16,6 +16,26 @@ function get_platform () {
     set -e
 }
 
+function get_platform_with_flag_name () {
+    set +e
+    platform=$1
+    mlu_model=`cat /proc/driver/*/*/*/information | grep "Device name" | uniq`
+    gpu_model=`cat /proc/driver/*/*/*/information | grep "Model" | uniq`
+    if [[ $mlu_model ]]; then
+        platform=`echo $mlu_model | awk -F " " '{print $3}'`
+        platform=${platform/-/_}
+        str_contain=$(echo ${platform} | grep "MLU370")
+        if [[ ${str_contain} != "" ]]; then
+            platform="MLU370"
+        fi
+    elif [[ $gpu_model ]]; then
+        platform=`echo $gpu_model | awk -F ":" '{print $2}' | awk -F "-" '{print $1}' | awk -F " " '{print $2}'`
+    fi
+    echo "Platform is: " $platform
+    eval $1=$platform
+    set -e
+}
+
 function get_ecc_status () {
     set +e
     ecc_status=$1

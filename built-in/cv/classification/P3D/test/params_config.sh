@@ -23,7 +23,9 @@ p3d_base_params () {
     benchmark_mode="True"
     max_batch_size_MLU290="16"
     max_batch_size_MLU370="40"
-    max_batch_size_MLU590="40"
+    max_batch_size_MLU590_M9="40"
+    max_batch_size_MLU590_M9U="40"
+    max_batch_size_MLU590_H8="40"
     max_batch_size_MLU370_ECC="40"
     max_batch_size_V100="16"
 
@@ -52,6 +54,7 @@ set_configs () {
                     backend="nccl" ;;
             ddp)    ddp="True";
                     get_visible_cards device_number ;;
+            dummy_test)    dummy_test="True" ;;
             ci)     benchmark_mode=False;
                     train_steps="2";
                     eval_steps="2";
@@ -70,7 +73,7 @@ set_configs () {
     # 处理benchmark_mode所需的参数
     if [[ $benchmark_mode == "True" ]]; then
         ## 设置benchmark_mode log路径
-        export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
+        #export BENCHMARK_LOG=${CUR_DIR}/../../../../benchmark_log
         log_dir="${CUR_DIR}/../p3d_${device_number}_card_log/"
 
         ## 获取平台类型，配置最大batch_size

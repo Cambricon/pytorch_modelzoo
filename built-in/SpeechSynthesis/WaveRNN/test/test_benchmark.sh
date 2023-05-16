@@ -13,10 +13,10 @@ function usage () {
     echo "|             device: mlu, gpu"
     echo "|             option1(multicards): ddp"
     echo "|                                                   "
-    echo "|  eg.1. bash test_benchmark.sh -c wavernn-fp32-mlu"
+    echo "|  eg.1. bash test_benchmark.sh  fp32-mlu"
     echo "|      which means running WaveRNN on single MLU card with fp32 precision."
     echo "|                                                   "
-    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh -c wavernn-O1-mlu-ddp"
+    echo "|  eg.2. export MLU_VISIBLE_DEVICES=0,1,2,3 && bash test_benchmark.sh O1-mlu-ddp"
     echo "|      which means running WaveRNN net on 4 MLU cards with O1 precision."
     echo -e "\033[32m ------------------------------------------------------------------- \033[0m"
 }
@@ -48,7 +48,7 @@ source ${CUR_DIR}/../../../../tools/utils/common_utils.sh
 set_configs "$config"
 
 # Set dataset name
-dataset_name="LJSpeech"
+dataset_name="LJSpeech-1.1"
 export DATASET_NAME=$dataset_name
 
 if [[ $ddp == "True" ]]; then
@@ -66,6 +66,7 @@ train_script="$WAVERNN_DIR/train.py --device $DEVIVE"
 
 main() {
     pushd $WAVERNN_DIR
+    pip install -r requirements.txt
 
     # create datasets dir
     if [ ! -d "./dataset" ]; then
@@ -127,10 +128,6 @@ main() {
     eval "${run_cmd}"
     popd
 }
-
-
-pushd $CUR_DIR/../../
-popd
 
 pushd $CUR_DIR
 main

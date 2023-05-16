@@ -1,0 +1,21 @@
+ARG FROM_IMAGE_NAME=yellow.hub.cambricon.com/pytorch/pytorch:v1.8.0-torch1.9-ubuntu18.04-py37
+FROM ${FROM_IMAGE_NAME}
+
+RUN mkdir /home/pytorch_modelzoo/
+
+COPY ./tools /home/pytorch_modelzoo/tools
+
+COPY ./built-in/Speech/speechbrain /home/pytorch_modelzoo/built-in/Speech/speechbrain
+
+WORKDIR /home/pytorch_modelzoo/built-in/Speech/speechbrain
+
+ENV VIRTUAL_ENV=/torch/venv3/pytorch
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+WORKDIR /home/pytorch_modelzoo/built-in/Speech/speechbrain/models
+
+RUN pip install -r requirements.txt
+RUN python setup.py install
+
+WORKDIR /home/pytorch_modelzoo/built-in/Speech/speechbrain

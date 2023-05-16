@@ -8,7 +8,7 @@ PointPillar网络结构GitHub链接可参考：[`[PointRCNN]`](https://arxiv.org
 
 ## 支持情况
 ### 模型训练支持情况
-Models  | Framework  | Supported MLU   | Supported Data Precision  | Multi-GPUs  |
+Models  | Framework  | Supported MLU   | Supported Data Precision  | Multi-MLUs  |
 ----- | ----- | ----- | ----- | ----- |
 PointPillar  | PyTorch  | MLU370-X8  | FP32  | Yes  |
 

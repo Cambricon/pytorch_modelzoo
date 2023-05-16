@@ -298,10 +298,10 @@ class MetricCollector(object):
         return True
 
     def _init_recorders(self):
-        if self.record_elapsed_time:
-            self._recorders.append(ElapsedTimer(count_down=adaptive_cnt))
         if self.record_hardware_time:
             self._recorders.append(HardwareTimer(count_down=adaptive_cnt))
+        if self.record_elapsed_time:
+            self._recorders.append(ElapsedTimer(count_down=adaptive_cnt))
         if self.profile_memory:
             self._recorders.append(MemoryProfiler())
 

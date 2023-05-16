@@ -48,6 +48,8 @@ fi
 
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="SQUAD_V1.1"
+    pip install -r requirements.txt
     run_cmd="python $use_launch run_squad.py \
         --model_type $model_type        \
         --model_name_or_path bert-base-cased    \

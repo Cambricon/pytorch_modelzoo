@@ -40,8 +40,13 @@ config=$1
 source ${CUR_DIR}/params_config.sh
 set_configs "$config"
 
+pushd $CUR_DIR/../models
+pip install -r requirements.txt
+popd
+
 # config配置到网络脚本的转换
 main() {
+    export DATASET_NAME="ImageNet2012"
     run_cmd="$CUR_DIR/../models/train.py \
              $dataset \
              --model $model\

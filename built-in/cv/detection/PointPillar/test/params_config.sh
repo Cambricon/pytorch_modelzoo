@@ -17,7 +17,9 @@ base_params () {
 
     benchmark_mode="True"
     max_batch_size_MLU370="8"
-    max_batch_size_MLU590="8"
+    max_batch_size_MLU590_M9="48"
+    max_batch_size_MLU590_M9U="48"
+    max_batch_size_MLU590_H8="40"
     max_batch_size_MLU370_ECC="8"
     max_batch_size_V100="8"
 
@@ -71,7 +73,7 @@ set_configs () {
 
         ## 获取平台类型，配置最大batch_size
         cur_platform=""
-        get_platform cur_platform
+        get_platform_with_flag_name cur_platform
         mbs_name=max_batch_size_${cur_platform}
 
         cur_ecc_status=""

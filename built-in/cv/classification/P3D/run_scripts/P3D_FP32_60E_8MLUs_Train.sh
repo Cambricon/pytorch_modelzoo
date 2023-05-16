@@ -18,5 +18,5 @@ pushd $P3D_DIR
 num_card=8
 export WORLD_SIZE=${num_card}
 export MLU_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-python -m torch.distributed.launch --master_port 29502 --nproc_per_node=8 main.py ${PYTORCH_TRAIN_DATASET}/ucf101/ --num-dev=${num_card} --batch-size 16 --lr 1e-3 --device_param mlu --dropout 0.9 --seed 42 --print-freq=50 --dist-backend cncl --cnmix --opt_level O0 --pretrained --early-stop=1000 --epoch=60
+python -m torch.distributed.launch --master_port 29502 --nproc_per_node=8 main.py ${PYTORCH_TRAIN_DATASET}/ucf101/ --num-dev=${num_card} --batch-size 16 --lr 1e-3 --device_param mlu --dropout 0.9 --seed 42 --print-freq=50 --dist-backend cncl --pretrained --early-stop=1000 --epoch=60
 popd

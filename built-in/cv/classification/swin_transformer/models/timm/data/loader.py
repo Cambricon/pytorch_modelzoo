@@ -98,8 +98,8 @@ class PrefetchLoader:
             self.random_erasing = None
         if torch_mlu_is_available:
             self._current_queue = None
-            self._notifier = Notifier.Notifier()
-            self._io_queue = torch_mlu._MLUC._getQueueFromPool(-1)
+            self._notifier = torch.mlu.Event()
+            self._io_queue = torch.mlu.Stream()
 
     def __iter__(self):
         stream = None
@@ -119,20 +119,18 @@ class PrefetchLoader:
                     if self.random_erasing is not None:
                         next_input = self.random_erasing(next_input)
             elif torch_mlu_is_available:
-                self._current_queue = torch_mlu._MLUC._getCurrentQueue(-1)
-                torch_mlu._MLUC._setCurrentQueue(self._io_queue)
-                ct.set_memory_strategy(True)
-                next_input = next_input.to("mlu", non_blocking=True)
-                next_target = next_target.to("mlu", non_blocking=True)
-                if self.fp16:
-                    next_input = next_input.half().sub_(self.mean).div_(self.std)
-                else:
-                    next_input = next_input.float().sub_(self.mean).div_(self.std)
-                if self.random_erasing is not None:
-                    next_input = self.random_erasing(next_input)
-                self._notifier.place()
-                ct.set_memory_strategy(False)
-                torch_mlu._MLUC._setCurrentQueue(self._current_queue)
+               with torch.mlu.stream(self._io_queue):
+                    ct.set_memory_strategy(True)
+                    next_input = next_input.to("mlu", non_blocking=True)
+                    next_target = next_target.to("mlu", non_blocking=True)
+                    if self.fp16:
+                        next_input = next_input.half().sub_(self.mean).div_(self.std)
+                    else:
+                        next_input = next_input.float().sub_(self.mean).div_(self.std)
+                    if self.random_erasing is not None:
+                        next_input = self.random_erasing(next_input)
+                    self._notifier.record()
+                    ct.set_memory_strategy(False) 
             
             if not first:
                 yield input, target
