@@ -129,9 +129,7 @@ bash run_scripts/MT5_FP32_4E_4MLUs_Train.sh
 | Models | Framework  | MLU             | Data Precision | Cards | Description                  | Run                                         |
 | ------ | ---------- | --------------- | -------------- | ----- | ---------------------------- | ------------------------------------------- |
 | MT5    | PyTorch1.6 && 1.9 | MLU370-X8/X4/S4 | FP32           | 4     | finetune training use 4 MLUs | bash run_scripts/MT5_FP32_4E_4MLUs_Train.sh |
-| MT5    | PyTorch1.6 && 1.9 | MLU370-X8/X4/S4 | FP32           | 1     | finetune training use 1 MLUs | bash run_scripts/MT5_FP32_4E_1MLUs_Train.sh |
 | MT5    | PyTorch1.6 && 1.9 | MLU370-X8/X4/S4 | AMP            | 4     | finetune training use 4 MLUs | bash run_scripts/MT5_AMP_4E_4MLUs_Train.sh  |
-| MT5    | PyTorch1.6 && 1.9 | MLU370-X8/X4/S4 | AMP            | 1     | finetune training use 1 MLUs | bash run_scripts/MT5_AMP_4E_1MLUs_Train.sh  |
 
 训练完成后，在当前目录下会生成`saved_model/summary_model`文件
 

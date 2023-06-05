@@ -175,8 +175,12 @@ def train(rank, world_size, args):
     # 加载T5PegasusTokenizer分词器
     tokenizer = T5PegasusTokenizer.from_pretrained(args.pretrain_model)
 
-    model = MT5ForConditionalGeneration.from_pretrained(
+    if args.resume_model != "" and os.path.exists(args.resume_model):
+        model = torch.load(args.resume_model, map_location='cpu').to(device)
+    else:
+        model = MT5ForConditionalGeneration.from_pretrained(
         args.pretrain_model).to(device)
+
     if args.distributed:
         model = DDP(model, device_ids=[rank])
 
@@ -386,6 +390,7 @@ if __name__ == '__main__':
     parser.add_argument('--master-port', default='29502', type=str, help='ddp address port.')
     parser.add_argument('--mode', type=str, default='training', choices=['training', 'evaluation'])
     parser.add_argument('--early_stop', action="store_true", default=False,help="if True, will early stop when valid accuracy is better than target accurary")
+    parser.add_argument('--resume_model', type=str, default="", help="resume model path")
 
 
 

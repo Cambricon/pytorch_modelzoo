@@ -93,8 +93,11 @@ PyTorch ModelZoo 仅提供公共数据集以及预训练模型的下载链接，
 
 
 ## Release Note
+### v0.3.0:
+- Cambricon Torch支持v1.14.0(Cambricon SDK 1.12)
+
 ### v0.2.0:
-- Cambricon Torch支持v1.13.0
+- Cambricon Torch支持v1.13.0(Cambricon SDK 1.11)
 
 - CV: 新增enet网络的支持，MaskRCNN支持COCO2017数据集训练
 

@@ -10,6 +10,7 @@ python finetune.py \
     --saved_model_dir ${MT5_SAVED_MODEL_DIR} \
     --saved_model_name ${MT5_SAVED_MODEL_NAME} \
     --amp \
+    --lr 0.0002 \
     --num_device 4 \
     --batch_size 4  \
     --device MLU  \

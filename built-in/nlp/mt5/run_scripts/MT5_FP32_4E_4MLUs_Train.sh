@@ -9,6 +9,7 @@ python finetune.py \
     --dev_data=${CSL_DIR}/benchmark/ts/dev.tsv \
     --saved_model_dir ${MT5_SAVED_MODEL_DIR} \
     --saved_model_name ${MT5_SAVED_MODEL_NAME} \
+    --lr 0.0002 \
     --num_device 4 \
     --batch_size 4 \
     --num_epoch 4 \
