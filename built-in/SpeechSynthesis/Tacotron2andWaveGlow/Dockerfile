@@ -5,8 +5,8 @@ RUN mkdir -p /home/pytorch_modelzoo/
 
 COPY ./tools /home/pytorch_modelzoo/built-in/tools
 
-COPY ./built-in/speechsynthesis/ /home/pytorch_modelzoo/built-in/SpeechSynthesis
-WORKDIR /home/pytorch_modelzoo/built-in/SpeechSynthesis
+COPY ./built-in/SpeechSynthesis/Tacotron2andWaveGlow /home/pytorch_modelzoo/built-in/SpeechSynthesis/Tacotron2andWaveGlow
+WORKDIR /home/pytorch_modelzoo/built-in/SpeechSynthesis/Tacotron2andWaveGlow
 
 ENV VIRTUAL_ENV=/torch/venv3/pytorch
 RUN python3 -m venv $VIRTUAL_ENV
