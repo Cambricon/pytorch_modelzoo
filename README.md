@@ -51,7 +51,7 @@ NLP:
 | [transformer](built-in/nlp/transformer) | PyTorch1.6|FP32|YES| CNNL |
 | [BERT](built-in/nlp/BERT/) | PyTorch1.6|FP32|YES| CNNL |
 | [bert-base-cased](built-in/nlp/bert-base-cased) | PyTorch1.6|FP32&&AMP|YES| CNNL |
-| [CRF](built-in/nlp/CRF) | PyTorch1.6|FP32|YES| CNNL |
+| [CRF](built-in/nlp/CRF) | PyTorch1.6|FP32|NO| CNNL |
 | [bert_base_finetune_msra_ner](built-in/nlp/bert_base_finetune_msra_ner) | PyTorch1.6|FP32&&AMP|YES| CNNL |
 | [DeepSpeech2](built-in/nlp/DeepSpeech2) | PyTorch1.6|FP32|YES| CNNL |
 | [MT5](built-in/nlp/mt5) | PyTorch1.6 && 1.9|FP32&&AMP|YES| CNNL |
